@@ -1,4 +1,7 @@
+import DefaultButton from "~/components/DefaultButton";
 import type { Route } from "./+types/home";
+import DefaultInput from "~/components/DefaultInput";
+import { useState } from "react";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -7,9 +10,19 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
+
+
 export default function TestePage() {
+
+    const [teste, setTeste] = useState("Valor do input");
   return <>
     <span>Olá, Mundo!</span>
-    <span>Rota Teste!</span>
+    <br />
+    <DefaultButton>{teste}</DefaultButton>
+    <br />
+    <input type="text" value={teste} onChange={e=>{
+        setTeste(e.target.value)
+    }}/>
+    {/*<DefaultInput/> */}
   </>
 }
