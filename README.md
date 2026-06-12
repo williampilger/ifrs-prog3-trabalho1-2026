@@ -6,6 +6,7 @@
 > - Felipe Gerhard Ledur
 > - William Pilger
 
+Prototipo: https://www.figma.com/design/vDjcTzuuNJVd1vlpg5hcm8/Daily-UI?node-id=0-1&t=xH8LEgJP18sTBvFv-1
 
 ---
 
