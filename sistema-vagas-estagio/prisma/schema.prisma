@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum TipoUsuario {
+  aluno
+  empresa
+}
+
+enum Turno {
+  integral
+  manha
+  tarde
+  noite
+}
+
+enum Modalidade {
+  presencial
+  remoto
+  hibrido
+}
+
+model Usuario {
+  id          Int          @id @default(autoincrement())
+  nome        String
+  email       String       @unique
+  pswd        String
+  telefone    String?
+  criadoEm   DateTime     @default(now())
+  excluidoEm DateTime?
+  tipo        TipoUsuario
+
+  vagas       Vaga[]
+  areas       UsuarioArea[]
+
+  @@map("usuarios")
+}
+
+model Area {
+  id       Int           @id @default(autoincrement())
+  nome     String        @unique
+
+  vagas    Vaga[]
+  usuarios UsuarioArea[]
+
+  @@map("areas")
+}
+
+model UsuarioArea {
+  usuarioId Int
+  areaId    Int
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+  area    Area    @relation(fields: [areaId], references: [id])
+
+  @@id([usuarioId, areaId])
+  @@map("usuario_area")
+}
+
+model Vaga {
+  id              Int        @id @default(autoincrement())
+  titulo          String
+  descricao       String
+  areaId          Int
+  empresaId       Int
+  turno           Turno
+  modalidade      Modalidade
+  local           String?
+  contatoNome     String?
+  contatoTelefone String?
+  contatoEmail    String?
+  criadoEm       DateTime   @default(now())
+  excluidoEm     DateTime?
+
+  area    Area    @relation(fields: [areaId], references: [id])
+  empresa Usuario @relation(fields: [empresaId], references: [id])
+
+  @@map("vagas")
+}
