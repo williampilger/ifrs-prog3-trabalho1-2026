@@ -54,9 +54,8 @@ export default function Home() {
         {features.map((f) => (
           <div
             key={f.titulo}
-            className="rounded-xl border border-color-border bg-white/60 p-6"
           >
-            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#006B1F] text-lg text-white">
+            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary text-lg text-white">
               {f.icone}
             </div>
             <h3 className="mt-4 text-lg font-bold text-text-secondary">{f.titulo}</h3>

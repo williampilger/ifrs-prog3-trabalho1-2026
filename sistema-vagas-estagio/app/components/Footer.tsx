@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer className="border-t border-border">
+    <footer className="border-t border-border-color">
       <div className="mx-auto flex max-w-[1280px] items-center justify-between px-6 py-5 md:px-8">
         {/* Logo institucional */}
         <span className="text-base font-bold text-text-secondary">IFRS Feliz</span>
