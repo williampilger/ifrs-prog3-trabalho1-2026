@@ -4,6 +4,7 @@
   /* Colors */
   --color-primary: #006b1f;
   --color-primary-light: #f5fbef;
+  --color-primary-dark: #005419;
   --color-secondary: #e4eade;
   --color-text-primary: #3f4a3c;
   --color-text-secondary: #171d16;
@@ -60,6 +61,7 @@
 @theme inline {
   --color-primary: var(--color-primary);
   --color-primary-light: var(--color-primary-light);
+  --color-primary-dark: var(--color-primary-dark);
   --color-secondary: var(--color-secondary);
   --color-text-primary: var(--color-text-primary);
   --color-text-secondary: var(--color-text-secondary);

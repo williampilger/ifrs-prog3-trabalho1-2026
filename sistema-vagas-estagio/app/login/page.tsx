@@ -1,4 +1,4 @@
-import { RiGraduationCapLine } from "react-icons/ri";
+import { MdSchool } from "react-icons/md";
 
 const Login = () => {
     return(
@@ -6,7 +6,7 @@ const Login = () => {
             <div className="flex flex-col items-baseline-last">
                 <div className="flex flex-col items-center gap-1">
                     <div className="bg-primary rounded p-2 w-fit">
-                        <RiGraduationCapLine className="fill-white block" size={30}/>
+                        <MdSchool className="fill-white block" size={30}/>
                     </div>
                     <h1 className="text-primary">Sistema de Estágios</h1>
                     <span>IFRS CAMPUS FELIZ</span>
