@@ -40,7 +40,7 @@ export default function Home() {
               <MdSchool className="fill-white block" size={20}/>
               Sou Aluno
             </Link>
-            <Link href="/login?perfil=empresa" className="rounded-lg border border-primary px-6 py-3 text-sm font-medium text-primary hover:bg-primary-light transition-colors flex items-center gap-2">
+            <Link href="/empresa" className="rounded-lg border border-primary px-6 py-3 text-sm font-medium text-primary hover:bg-primary-light transition-colors flex items-center gap-2">
               <MdBusiness className="fill-primary block" size={20}/>
               Sou Empresa
             </Link>
