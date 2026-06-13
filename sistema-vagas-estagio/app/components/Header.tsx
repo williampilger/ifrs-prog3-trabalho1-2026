@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function Header() {
   return (
-    <header className="bg-background-color-white border-b border-color-border flex items-center justify-between px-8 py-5">
+    <header className="bg-background-color border-b border-color-border flex items-center justify-between px-8 py-5">
       {/* Logo / nome do sistema */}
       <Link href="/" className="text-lg font-bold text-primary">
         Sistema de Estágios

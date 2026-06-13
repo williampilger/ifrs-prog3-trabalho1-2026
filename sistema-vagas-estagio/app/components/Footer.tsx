@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { RiInstagramLine } from "react-icons/ri";
+import { MdWeb } from "react-icons/md";
+
 
 export default function Footer() {
   return (
@@ -14,11 +17,13 @@ export default function Footer() {
 
         {/* Links */}
         <div className="flex items-center gap-4">
-          <Link href="/termos" className="text-sm text-text-muted hover:text-primary">
-            Termos de Uso
+          <Link href="https://www.instagram.com/ifrs.feliz/" className="text-sm text-text-muted hover:text-primary">
+            <RiInstagramLine className="inline-block mr-1" />
+            Instagram
           </Link>
-          <Link href="/privacidade" className="text-sm text-text-muted hover:text-primary">
-            Privacidade
+          <Link href="https://www.ifrs.edu.br/feliz/" className="text-sm text-text-muted hover:text-primary">
+            <MdWeb className="inline-block mr-1" />
+            Site do IFRS
           </Link>
         </div>
       </div>

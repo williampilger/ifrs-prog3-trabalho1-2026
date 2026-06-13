@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { MdSchool, MdBusiness, MdAccountBalance, MdVerified, MdSpeed } from "react-icons/md";
+import Card from "../components/Card";
 
 const features = [
   {
@@ -52,15 +53,15 @@ export default function Home() {
       
       <section className="grid gap-6 py-12 md:grid-cols-3">
         {features.map((f) => (
-          <div
-            key={f.titulo}
-          >
-            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary text-lg text-white">
-              {f.icone}
-            </div>
-            <h3 className="mt-4 text-lg font-bold text-text-secondary">{f.titulo}</h3>
-            <p className="mt-2 text-sm text-text-muted">{f.texto}</p>
-          </div>
+          <Card key={f.titulo}>
+            <div>
+              <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary text-lg">
+                {f.icone}
+              </div>
+              <h3 className="mt-4 text-lg font-bold text-text-secondary">{f.titulo}</h3>
+              <p className="mt-2 text-sm text-text-muted">{f.texto}</p>
+            </div> 
+          </Card>
         ))}
       </section>
     </>

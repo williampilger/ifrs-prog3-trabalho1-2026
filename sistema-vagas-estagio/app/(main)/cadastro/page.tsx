@@ -2,12 +2,35 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import {z} from "zod"
+import { MdVisibility, MdVisibilityOff } from "react-icons/md";
+import Card from "@/app/components/Card";
+
+// Validação
+  const schemaAluno = z.object({
+    nome: z.string().min(3, "O nome deve ter pelo menos 3 caracteres").nonempty("O nome é obrigatório"),
+    email: z.email("Email inválido").nonempty("O email é obrigatório"),
+    senha: z.string().min(6, "A senha deve ter pelo menos 6 caracteres").nonempty("A senha é obrigatória"),
+    telefone: z.string().min(10, "O telefone deve ter o DDD e o número").nonempty("O telefone é obrigatório"),
+    nascimento: z.string().min(1, "Informe sua data de nascimento").nonempty("A data de nascimento é obrigatória"),
+    curso: z.string().min(1, "Selecione seu curso").nonempty("O curso é obrigatório"),
+    aceito: z.literal(true, {message: "Você deve aceitar os termos e condições"}),
+  })
+
+  const schemaEmpresa = z.object({
+    nome: z.string().min(3, "O nome deve ter pelo menos 3 caracteres").nonempty("O nome é obrigatório"),
+    email: z.email("Email inválido").nonempty("O email é obrigatório"),
+    senha: z.string().min(6, "A senha deve ter pelo menos 6 caracteres").nonempty("A senha é obrigatória"),
+    telefone: z.string().min(10, "O telefone deve ter o DDD e o número").nonempty("O telefone é obrigatório"),
+    cnpj: z.string().min(14, "O CNPJ deve ter 14 dígitos").nonempty("O CNPJ é obrigatório"),
+    aceito: z.literal(true, {message: "Você deve aceitar os termos e condições"}),
+  })
 
 export default function Cadastro() {
-  // Aba ativa: "aluno" ou "empresa"
+  // Abas
   const [aba, setAba] = useState<"aluno" | "empresa">("aluno");
 
-  // Campos comuns às duas abas
+  // Campos 
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
@@ -19,13 +42,45 @@ export default function Cadastro() {
 
   // Campo só de empresa
   const [cnpj, setCnpj] = useState("");
+  
+  // Mostrar/esconder senha
+  const [mostrarSenha, setMostrarSenha] = useState(false);
 
+  // Aceito os termos
+  const [aceito, setAceito] = useState(false);
+
+  const [erros, setErros] = useState<Record<string, string>>({});
+
+  function handleSubmit(e: React.SubmitEvent){
+    e.preventDefault();
+    
+    const schema = aba === "aluno" ? schemaAluno : schemaEmpresa;
+    const dados =
+      aba === "aluno"
+        ? { nome, email, senha, telefone, nascimento, curso, aceito}
+        : { nome, email, senha, telefone, cnpj, aceito };
+    const resultado = schema.safeParse(dados);
+    console.log(resultado);
+
+    if(!resultado.success){
+      const novosErros: Record<string, string> = {};
+      for (const erro of resultado.error.issues){
+        novosErros[erro.path[0] as string] = erro.message;
+      }
+      setErros(novosErros);
+      return
+    }
+
+    setErros({});
+    console.log("Dados válidos!", resultado.data);
+  }
+  
   return (
-    <div className="mx-auto max-w-md rounded-2xl border border-border bg-white p-8 shadow-sm">
+    <Card>
       {/* Abas */}
       <div className="mb-6 flex border-b border-border">
         <button
-          onClick={() => setAba("aluno")}
+          onClick={() => {setAba("aluno"); setErros({});}}
           className={`flex-1 pb-3 text-sm font-medium transition-colors ${
             aba === "aluno"
               ? "border-b-2 border-primary text-primary"
@@ -35,7 +90,7 @@ export default function Cadastro() {
           Sou Aluno
         </button>
         <button
-          onClick={() => setAba("empresa")}
+          onClick={() => {setAba("empresa"); setErros({});}}
           className={`flex-1 pb-3 text-sm font-medium transition-colors ${
             aba === "empresa"
               ? "border-b-2 border-primary text-primary"
@@ -57,12 +112,13 @@ export default function Cadastro() {
       </p>
 
       {/* Formulário */}
-      <form className="flex flex-col gap-4">
+      <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         <Campo
           label={aba === "aluno" ? "Nome Completo" : "Razão Social"}
           placeholder={aba === "aluno" ? "Digite seu nome completo" : "Nome da empresa"}
           value={nome}
           onChange={setNome}
+          erro={erros.nome}
         />
 
         <Campo
@@ -71,17 +127,30 @@ export default function Cadastro() {
           placeholder={aba === "aluno" ? "seu.nome@aluno.feliz.ifrs.edu.br" : "contato@empresa.com.br"}
           value={email}
           onChange={setEmail}
+          erro={erros.email}
         />
 
         <div className="grid grid-cols-2 gap-4">
-          <Campo
-            label="Senha"
-            type="password"
-            placeholder="••••••••"
-            value={senha}
-            onChange={setSenha}
-          />
-
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-text-primary"> Senha </label>
+            <div className="relative">
+              <input
+              type={mostrarSenha ? "text" : "password"}
+              placeholder="••••••••"
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
+              className="w-full rounded-md border border-border px-4 py-2 pr-16 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+              <button
+                type="button"
+                onClick={() => setMostrarSenha((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-primary"
+              >
+                {mostrarSenha ? <MdVisibilityOff />: <MdVisibility />}
+              </button>
+            </div>
+            {erros.senha && <p className="text-xs text-red-600">{erros.senha}</p>}
+          </div>
           {/* Campo que MUDA conforme a aba */}
           {aba === "aluno" ? (
             <Campo
@@ -89,6 +158,7 @@ export default function Cadastro() {
               type="date"
               value={nascimento}
               onChange={setNascimento}
+              erro={erros.nascimento}
             />
           ) : (
             <Campo
@@ -96,6 +166,7 @@ export default function Cadastro() {
               placeholder="00.000.000/0000-00"
               value={cnpj}
               onChange={setCnpj}
+              erro={erros.cnpj}
             />
           )}
         </div>
@@ -106,6 +177,7 @@ export default function Cadastro() {
             placeholder="(54) 99999-9999"
             value={telefone}
             onChange={setTelefone}
+            erro={erros.telefone}
           />
 
           {/* Curso só aparece pra aluno */}
@@ -122,16 +194,18 @@ export default function Cadastro() {
                 <option value="quimica">Química</option>
                 <option value="admin">Administração</option>
               </select>
+              {erros.curso && <p className="text-xs text-red-600">{erros.curso}</p>}
             </div>
           )}
         </div>
 
         <label className="flex items-center gap-2 text-sm text-text-muted">
-          <input type="checkbox" className="accent-primary" />
+          <input type="checkbox" className="accent-primary" checked={aceito} onChange={(e) => setAceito(e.target.checked)} />
           Eu aceito os{" "}
           <Link href="/termos" className="text-primary">Termos de Uso</Link> e{" "}
           <Link href="/privacidade" className="text-primary">Política de Privacidade</Link>.
         </label>
+        {erros.aceito && <p className="text-xs text-red-600">{erros.aceito}</p>}
 
         <button
           type="submit"
@@ -145,7 +219,7 @@ export default function Cadastro() {
         Já possui uma conta?{" "}
         <Link href="/login" className="font-medium text-primary">Faça Login</Link>
       </p>
-    </div>
+    </Card>
   );
 }
 
@@ -156,12 +230,14 @@ function Campo({
   placeholder,
   value,
   onChange,
+  erro,
 }: {
   label: string;
   type?: string;
   placeholder?: string;
   value: string;
   onChange: (v: string) => void;
+  erro?: string;
 }) {
   return (
     <div className="flex flex-col gap-1">
@@ -173,6 +249,7 @@ function Campo({
         onChange={(e) => onChange(e.target.value)}
         className="rounded-md border border-border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
       />
+      {erro && <p className="text-xs text-red-600">{erro}</p>}
     </div>
   );
 }
