@@ -1,10 +1,12 @@
 import Link from "next/link";
+import Image from "next/image"
 
 export default function Header() {
   return (
-    <header className="bg-background-color border-b border-color-border flex items-center justify-between px-8 py-5">
+    <header className="bg-color-background border-b border-color-border flex items-center justify-between px-8 py-5">
       {/* Logo / nome do sistema */}
-      <Link href="/" className="text-lg font-bold text-primary">
+      <Link href="/" className="text-lg font-bold text-primary flex items-center gap-2">
+        <Image src="/images/ifrs-logo-verde.png" alt="Logo Ifrs" width={40} height={40} />
         Sistema de Estágios
       </Link>
 
