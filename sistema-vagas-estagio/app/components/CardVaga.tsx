@@ -1,51 +1,60 @@
 "use client";
 
 import { useState } from "react";
+import Card from "./Card";
 import { MdSchool, MdLocationOn, MdAttachMoney, MdCheckCircleOutline, MdEdit, MdDelete, MdCheckCircle } from "react-icons/md";
 
-export default function CardVaga() {
-  const [vaga, setVaga] = useState({
-    titulo: "Titulo",
-    descricao: "Descrição da vaga",
-    curso: "Curso",
-    local: "Local",
-    remuneracao: "Remuneração",
-  });
+type CardVagaProps = {
+  titulo: string;
+  descricao: string;
+  curso: string;
+  local: string;
+  remuneracao: string;
+  statusInicial?: boolean; // true = preenchida
+};
 
-  const [preenchida, setPreenchida] = useState(false);
+export default function CardVaga({
+  titulo,
+  descricao,
+  curso,
+  local,
+  remuneracao,
+  statusInicial = false,
+}: CardVagaProps) {
+  const [preenchida, setPreenchida] = useState(statusInicial);
 
   const corIcone = preenchida ? "text-text-muted" : "text-primary";
   const corTexto = preenchida ? "text-text-muted" : "text-text-primary";
 
   return (
-    <div className="rounded-2xl border border-border bg-white p-8 shadow-sm">
+    <Card className="bg-white border border-border">
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1">
           <div className="flex items-center gap-3">
             <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold tracking-wide ${
-            preenchida ? "bg-gray-200 text-text-muted" : "bg-green-100 text-primary"
+              preenchida ? "bg-secondary text-text-muted" : "bg-background-success text-primary"
             }`}>
-            {preenchida ? "Preenchida" : "Ativa"}
+              {preenchida ? "Preenchida" : "Ativa"}
             </span>
             <h2 className={`text-lg font-bold ${preenchida ? "text-text-muted" : "text-text-secondary"}`}>
-              {vaga.titulo}
+              {titulo}
             </h2>
           </div>
 
-          <p className="mt-2 text-sm text-text-muted">{vaga.descricao}</p>
+          <p className="mt-2 text-sm text-text-muted">{descricao}</p>
 
           <div className={`mt-4 flex flex-wrap items-center gap-6 ${corTexto}`}>
             <span className="flex items-center gap-1.5">
               <MdSchool className={corIcone} />
-              <span>{vaga.curso}</span>
+              <span>{curso}</span>
             </span>
             <span className="flex items-center gap-1.5">
               <MdLocationOn className={corIcone} />
-              <span>{vaga.local}</span>
+              <span>{local}</span>
             </span>
             <span className="flex items-center gap-1.5">
               <MdAttachMoney className={corIcone} />
-              <span>{vaga.remuneracao}</span>
+              <span>{remuneracao}</span>
             </span>
           </div>
         </div>
@@ -61,11 +70,11 @@ export default function CardVaga() {
           >
             {preenchida ? <MdCheckCircle size={24} /> : <MdCheckCircleOutline size={24} />}
           </button>
-          <button className="text-red-600 hover:text-red-700" title="Excluir">
+          <button className="text-danger hover:text-danger-dark" title="Excluir">
             <MdDelete size={24} />
           </button>
         </div>
       </div>
-    </div>
+    </Card>
   );
 }
