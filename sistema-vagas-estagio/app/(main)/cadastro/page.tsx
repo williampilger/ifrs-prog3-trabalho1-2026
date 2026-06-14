@@ -5,26 +5,27 @@ import Link from "next/link";
 import {z} from "zod"
 import { MdVisibility, MdVisibilityOff } from "react-icons/md";
 import Card from "@/app/components/Card";
+import Campo from "@/app/components/Campo"
 
 // Validação
-  const schemaAluno = z.object({
-    nome: z.string().min(3, "O nome deve ter pelo menos 3 caracteres").nonempty("O nome é obrigatório"),
-    email: z.email("Email inválido").nonempty("O email é obrigatório"),
-    senha: z.string().min(6, "A senha deve ter pelo menos 6 caracteres").nonempty("A senha é obrigatória"),
-    telefone: z.string().min(10, "O telefone deve ter o DDD e o número").nonempty("O telefone é obrigatório"),
-    nascimento: z.string().min(1, "Informe sua data de nascimento").nonempty("A data de nascimento é obrigatória"),
-    curso: z.string().min(1, "Selecione seu curso").nonempty("O curso é obrigatório"),
-    aceito: z.literal(true, {message: "Você deve aceitar os termos e condições"}),
-  })
+const schemaAluno = z.object({
+  nome: z.string().min(3, "O nome deve ter pelo menos 3 caracteres").nonempty("O nome é obrigatório"),
+  email: z.email("Email inválido").nonempty("O email é obrigatório"),
+  senha: z.string().min(6, "A senha deve ter pelo menos 6 caracteres").nonempty("A senha é obrigatória"),
+  telefone: z.string().min(10, "O telefone deve ter o DDD e o número").nonempty("O telefone é obrigatório"),
+  nascimento: z.string().min(1, "Informe sua data de nascimento").nonempty("A data de nascimento é obrigatória"),
+  curso: z.string().min(1, "Selecione seu curso").nonempty("O curso é obrigatório"),
+  aceito: z.literal(true, {message: "Você deve aceitar os termos e condições"}),
+})
 
-  const schemaEmpresa = z.object({
-    nome: z.string().min(3, "O nome deve ter pelo menos 3 caracteres").nonempty("O nome é obrigatório"),
-    email: z.email("Email inválido").nonempty("O email é obrigatório"),
-    senha: z.string().min(6, "A senha deve ter pelo menos 6 caracteres").nonempty("A senha é obrigatória"),
-    telefone: z.string().min(10, "O telefone deve ter o DDD e o número").nonempty("O telefone é obrigatório"),
-    cnpj: z.string().min(14, "O CNPJ deve ter 14 dígitos").nonempty("O CNPJ é obrigatório"),
-    aceito: z.literal(true, {message: "Você deve aceitar os termos e condições"}),
-  })
+const schemaEmpresa = z.object({
+  nome: z.string().min(3, "O nome deve ter pelo menos 3 caracteres").nonempty("O nome é obrigatório"),
+  email: z.email("Email inválido").nonempty("O email é obrigatório"),
+  senha: z.string().min(6, "A senha deve ter pelo menos 6 caracteres").nonempty("A senha é obrigatória"),
+  telefone: z.string().min(10, "O telefone deve ter o DDD e o número").nonempty("O telefone é obrigatório"),
+  cnpj: z.string().min(14, "O CNPJ deve ter 14 dígitos").nonempty("O CNPJ é obrigatório"),
+  aceito: z.literal(true, {message: "Você deve aceitar os termos e condições"}),
+})
 
 export default function Cadastro() {
   // Abas
@@ -76,7 +77,7 @@ export default function Cadastro() {
   }
   
   return (
-    <Card className="max-w-2xl mx-auto">
+    <Card className="max-w-2xl mx-auto bg-background">
       {/* Abas */}
       <div className="mb-6 flex border-b border-border">
         <button
@@ -101,10 +102,9 @@ export default function Cadastro() {
         </button>
       </div>
 
-      {/* Título dinâmico */}
-      <p className="text-lg font-bold text-text-secondary">
+      <h2 className="font-bold text-text-secondary">
         {aba === "aluno" ? "Cadastro de Estudante" : "Cadastro de Empresa"}
-      </p>
+      </h2>
       <p className="mt-1 mb-6 text-sm text-text-muted">
         {aba === "aluno"
           ? "Preencha os dados abaixo com suas informações institucionais."
@@ -220,36 +220,5 @@ export default function Cadastro() {
         <Link href="/login" className="font-medium text-primary">Faça Login</Link>
       </p>
     </Card>
-  );
-}
-
-// Componente pequeno pra um campo de input (evita repetir a estrutura)
-function Campo({
-  label,
-  type = "text",
-  placeholder,
-  value,
-  onChange,
-  erro,
-}: {
-  label: string;
-  type?: string;
-  placeholder?: string;
-  value: string;
-  onChange: (v: string) => void;
-  erro?: string;
-}) {
-  return (
-    <div className="flex flex-col gap-1">
-      <label className="text-sm font-medium text-text-primary">{label}</label>
-      <input
-        type={type}
-        placeholder={placeholder}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="rounded-md border border-border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-      />
-      {erro && <p className="text-xs text-red-600">{erro}</p>}
-    </div>
   );
 }

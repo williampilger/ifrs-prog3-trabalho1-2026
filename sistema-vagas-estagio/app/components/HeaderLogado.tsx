@@ -16,7 +16,7 @@ export default function HeaderLogado({ nome, iniciais }: HeaderLogadoProps) {
   return (
     <header className="bg-background border-b border-border flex items-center justify-between px-8 py-5">
       <Link href="/" className="text-lg font-bold text-primary flex items-center gap-2">
-        <Image src="/images/ifrs-logo-verde.png" alt="Logo Ifrs" width={40} height={40} />
+        <Image src="/images/ifrs-logo-verde.png" alt="Logo Ifrs" width={40} height={40} style={{ height: "auto" }}/>
         Sistema de Estágios
       </Link>
 
