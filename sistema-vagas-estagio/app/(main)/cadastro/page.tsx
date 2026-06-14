@@ -76,7 +76,7 @@ export default function Cadastro() {
   }
   
   return (
-    <Card>
+    <Card className="max-w-2xl mx-auto">
       {/* Abas */}
       <div className="mb-6 flex border-b border-border">
         <button

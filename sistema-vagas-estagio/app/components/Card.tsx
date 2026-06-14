@@ -1,10 +1,12 @@
 export default function Card({
     children,
+    className,
 }: {
     children: React.ReactNode;
+    className?: string;
 }) {
     return (
-        <div className="mx-auto max-w-2xl rounded-2xl border border-border bg-white p-8 shadow-sm">
+        <div className={`rounded-2xl border border-border bg-white p-8 shadow-sm ${className || ""}`}>
             {children}
         </div>
     );
