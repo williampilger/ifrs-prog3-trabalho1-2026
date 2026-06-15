@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { MdSchool, MdBusiness, MdAccountBalance, MdVerified, MdSpeed } from "react-icons/md";
 import Card from "../components/Card";
+import CardFeature from "../components/CardFeature";
 
 const features = [
   {
@@ -40,7 +41,7 @@ export default function Home() {
               <MdSchool className="fill-white block" size={20}/>
               Sou Aluno
             </Link>
-            <Link href="/empresa" className="rounded-lg border border-primary px-6 py-3 text-sm font-medium text-primary hover:bg-primary-light transition-colors flex items-center gap-2">
+            <Link href="/empresa" className="rounded-lg border bg-background border-primary px-6 py-3 text-sm font-medium text-primary hover:bg-primary-light transition-colors flex items-center gap-2">
               <MdBusiness className="fill-primary block" size={20}/>
               Sou Empresa
             </Link>
@@ -51,17 +52,9 @@ export default function Home() {
         </div>
       </section>
       
-      <section className="grid gap-6 py-12 md:grid-cols-3">
+      <section className="grid grid-cols-1 gap-6 md:grid-cols-3">
         {features.map((f) => (
-          <Card key={f.titulo}>
-            <div>
-              <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary text-lg">
-                {f.icone}
-              </div>
-              <h3 className="mt-4 text-lg font-bold text-text-secondary">{f.titulo}</h3>
-              <p className="mt-2 text-sm text-text-muted">{f.texto}</p>
-            </div> 
-          </Card>
+          <CardFeature key={f.titulo} titulo={f.titulo} texto={f.texto} icone={f.icone} />
         ))}
       </section>
     </>
