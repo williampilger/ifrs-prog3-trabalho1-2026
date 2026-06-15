@@ -37,7 +37,7 @@ export default function Home() {
             formalização e acompanhamento de estágios obrigatórios e não-obrigatórios.
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
-            <Link href="/login?perfil=aluno" className="rounded-lg bg-primary px-6 py-3 text-sm font-medium text-white hover:bg-primary-dark transition-colors flex items-center gap-2">
+            <Link href="/aluno" className="rounded-lg bg-primary px-6 py-3 text-sm font-medium text-white hover:bg-primary-dark transition-colors flex items-center gap-2">
               <MdSchool className="fill-white block" size={20}/>
               Sou Aluno
             </Link>
