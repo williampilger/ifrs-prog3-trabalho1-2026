@@ -4,6 +4,9 @@ dotenv.config();
 
 interface EnvConfig {
     
+    SUPPRESS_RESPONSE_ERROR_MESSAGES: boolean;
+    SERVER_UNDER_MAINTENANCE: boolean;
+
     DATABASE_URL: string;
     PORT: number;
     ALLOWED_ORIGINS: string[];
@@ -26,6 +29,10 @@ requiredEnvVars.forEach((varName) => {
 });
 
 const ENV: EnvConfig = {
+
+    SUPPRESS_RESPONSE_ERROR_MESSAGES: process.env.SUPPRESS_RESPONSE_ERROR_MESSAGES==='true',
+    SERVER_UNDER_MAINTENANCE: process.env.SERVER_UNDER_MAINTENANCE==='true',
+
     DATABASE_URL: process.env.DATABASE_URL as string,
     PORT: parseInt(process.env.PORT as string, 10),
     ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : ['*'],
@@ -33,7 +40,7 @@ const ENV: EnvConfig = {
     JWT_SECRET: process.env.JWT_SECRET as string,
     JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN as string,
     
-    LOG_LEVEL: (process.env.LOG_LEVEL as string) ?? 'trace',
+    LOG_LEVEL: process.env.LOG_LEVEL ?? 'trace',
     LOG_PRETTY: process.env.LOG_PRETTY === 'true',
     SAVE_LOG_TO_FILE: process.env.SAVE_LOG_TO_FILE === 'true'
 };
