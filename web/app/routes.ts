@@ -12,5 +12,6 @@ export default [
         route("aluno", "routes/aluno.tsx"),
         route("empresa", "routes/empresa.tsx"),
         route("empresa/vagas/nova", "routes/empresa.vagas.nova.tsx"),
+        route("vagas/detalhes", "routes/vagas.detalhes.tsx"),
     ]),
 ] satisfies RouteConfig;
