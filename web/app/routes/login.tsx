@@ -2,35 +2,41 @@ import { useState } from "react";
 import { MdSchool, MdVisibility, MdVisibilityOff } from "react-icons/md";
 import Card from "../components/Card";
 import Campo from "../components/Campo";
-import { z } from "zod";
-
-const schemaLogin = z.object({
-    email: z.email("E-mail inválido").min(1, "Informe seu e-mail"),
-    senha: z.string().min(1, "Informe sua senha"),
-});
 
 export default function Login() {
     const [email, setEmail] = useState("");
     const [senha, setSenha] = useState("");
     const [erros, setErros] = useState<Record<string, string>>({});
+    const [erroGeral, setErroGeral] = useState("");
     const [mostrarSenha, setMostrarSenha] = useState(false);
 
-    function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-        e.preventDefault();
-
-        const resultado = schemaLogin.safeParse({ email, senha });
-        if (!resultado.success) {
-            const novosErros: Record<string, string> = {};
-            for (const erro of resultado.error.issues) {
-                novosErros[erro.path[0] as string] = erro.message;
-            }
-            setErros(novosErros);
-            return;
-        }
-
+    async function handleSubmit() {
         setErros({});
-        console.log("Login válido:", resultado.data);
-        alert("Validação OK! (próximo: autenticar no backend)");
+        setErroGeral("");
+
+        try {
+            const resposta = await fetch("http://localhost:3333/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({ email, senha }),
+            });
+
+            const dados = await resposta.json();
+
+            if (!resposta.ok) {
+                if (dados.erros) {
+                    setErros(dados.erros);
+                } else {
+                    setErroGeral(dados.mensagem ?? "Não foi possível entrar.");
+                }
+                return;
+            }
+
+            console.log("Login OK:", dados);
+        } catch {
+            setErroGeral("Erro de conexão com o servidor.");
+        }
     }
 
     return (
@@ -46,7 +52,13 @@ export default function Login() {
                     </span>
                 </div>
                 <Card className="mt-6 w-full bg-background border border-border">
-                    <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+                    <form
+                        className="flex flex-col gap-4"
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            handleSubmit();
+                        }}
+                    >
                         <Campo
                             label="Email"
                             type="email"
@@ -80,6 +92,13 @@ export default function Login() {
                             </div>
                             {erros.senha && <p className="text-xs text-red-600">{erros.senha}</p>}
                         </div>
+
+                        {erroGeral && (
+                            <p className="rounded-md bg-red-50 px-4 py-2 text-sm text-red-600">
+                                {erroGeral}
+                            </p>
+                        )}
+
                         <button
                             type="submit"
                             className="mt-2 rounded-lg bg-primary py-3 text-sm font-medium text-white hover:bg-primary-dark transition-colors"

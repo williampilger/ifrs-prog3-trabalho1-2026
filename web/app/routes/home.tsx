@@ -1,11 +1,5 @@
 import { Link } from "react-router";
-import {
-    MdSchool,
-    MdBusiness,
-    MdAccountBalance,
-    MdVerified,
-    MdSpeed,
-} from "react-icons/md";
+import { MdSchool, MdBusiness, MdAccountBalance, MdVerified, MdSpeed } from "react-icons/md";
 import CardFeature from "../components/CardFeature";
 
 const features = [

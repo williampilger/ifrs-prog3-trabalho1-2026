@@ -1,47 +1,59 @@
 import { useState } from "react";
-import { Link } from "react-router";
+import { useLoaderData } from "react-router";
 import { MdVisibility, MdVisibilityOff } from "react-icons/md";
 import Card from "../components/Card";
 import Campo from "../components/Campo";
 
-export default function Cadastro() {
-    const [aba, setAba] = useState<"aluno" | "empresa">("aluno");
-    const [nome, setNome] = useState("");
-    const [email, setEmail] = useState("");
+type Usuario = {
+    tipo: "aluno" | "empresa";
+    nome: string;
+    email: string;
+    telefone: string;
+    nascimento?: string;
+    curso?: string;
+    cnpj?: string;
+};
+
+// Mock: depois isso busca o usuário logado pelo cookie JWT no backend
+export async function loader(): Promise<Usuario> {
+    return {
+        tipo: "aluno",
+        nome: "João Silva",
+        email: "joao.silva@aluno.feliz.ifrs.edu.br",
+        telefone: "54999999999",
+        nascimento: "2002-05-14",
+        curso: "info",
+    };
+}
+
+export default function Perfil() {
+    const usuario = useLoaderData<typeof loader>();
+    const ehAluno = usuario.tipo === "aluno";
+
+    const [nome, setNome] = useState(usuario.nome);
+    const [email, setEmail] = useState(usuario.email);
     const [senha, setSenha] = useState("");
-    const [telefone, setTelefone] = useState("");
-    const [nascimento, setNascimento] = useState("");
-    const [curso, setCurso] = useState("");
-    const [cnpj, setCnpj] = useState("");
+    const [telefone, setTelefone] = useState(usuario.telefone);
+    const [nascimento, setNascimento] = useState(usuario.nascimento ?? "");
+    const [curso, setCurso] = useState(usuario.curso ?? "");
+    const [cnpj, setCnpj] = useState(usuario.cnpj ?? "");
     const [mostrarSenha, setMostrarSenha] = useState(false);
-    const [aceito, setAceito] = useState(false);
     const [erros, setErros] = useState<Record<string, string>>({});
     const [erroGeral, setErroGeral] = useState("");
-
-    function trocarAba(nova: "aluno" | "empresa") {
-        setAba(nova);
-        setErros({});
-        setErroGeral("");
-    }
+    const [salvo, setSalvo] = useState(false);
 
     async function handleSubmit() {
         setErros({});
         setErroGeral("");
+        setSalvo(false);
 
-        // Aceite dos termos é regra de interface, verificada no front
-        if (!aceito) {
-            setErros({ aceito: "Você deve aceitar os termos e condições" });
-            return;
-        }
-
-        const dados =
-            aba === "aluno"
-                ? { nome, email, senha, telefone, nascimento, curso, tipo: "aluno" }
-                : { nome, email, senha, telefone, cnpj, tipo: "empresa" };
+        const dados = ehAluno
+            ? { nome, email, senha, telefone, nascimento, curso }
+            : { nome, email, senha, telefone, cnpj };
 
         try {
-            const resposta = await fetch("http://localhost:3333/cadastro", {
-                method: "POST",
+            const resposta = await fetch("http://localhost:3333/perfil", {
+                method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
                 body: JSON.stringify(dados),
@@ -53,13 +65,14 @@ export default function Cadastro() {
                 if (retorno.erros) {
                     setErros(retorno.erros);
                 } else {
-                    setErroGeral(retorno.mensagem ?? "Não foi possível criar a conta.");
+                    setErroGeral(retorno.mensagem ?? "Não foi possível salvar as alterações.");
                 }
                 return;
             }
 
-            console.log("Cadastro OK:", retorno);
-            // depois: redirecionar para /login ou já logar
+            setSalvo(true);
+            setSenha("");
+            console.log("Perfil atualizado:", retorno);
         } catch {
             setErroGeral("Erro de conexão com o servidor.");
         }
@@ -67,32 +80,9 @@ export default function Cadastro() {
 
     return (
         <Card className="max-w-2xl mx-auto bg-background">
-            <div className="mb-6 flex border-b border-border">
-                <button
-                    onClick={() => trocarAba("aluno")}
-                    className={`flex-1 pb-3 text-sm font-medium transition-colors ${
-                        aba === "aluno" ? "border-b-2 border-primary text-primary" : "text-text-muted"
-                    }`}
-                >
-                    Sou Aluno
-                </button>
-                <button
-                    onClick={() => trocarAba("empresa")}
-                    className={`flex-1 pb-3 text-sm font-medium transition-colors ${
-                        aba === "empresa" ? "border-b-2 border-primary text-primary" : "text-text-muted"
-                    }`}
-                >
-                    Sou Empresa
-                </button>
-            </div>
-
-            <h2 className="font-bold text-text-secondary">
-                {aba === "aluno" ? "Cadastro de Estudante" : "Cadastro de Empresa"}
-            </h2>
+            <h2 className="font-bold text-text-secondary">Editar Perfil</h2>
             <p className="mt-1 mb-6 text-sm text-text-muted">
-                {aba === "aluno"
-                    ? "Preencha os dados abaixo com suas informações institucionais."
-                    : "Preencha os dados da empresa para publicar vagas."}
+                Atualize seus dados abaixo. Deixe a senha em branco para mantê-la.
             </p>
 
             <form
@@ -103,8 +93,8 @@ export default function Cadastro() {
                 }}
             >
                 <Campo
-                    label={aba === "aluno" ? "Nome Completo" : "Razão Social"}
-                    placeholder={aba === "aluno" ? "Digite seu nome completo" : "Nome da empresa"}
+                    label={ehAluno ? "Nome Completo" : "Razão Social"}
+                    placeholder={ehAluno ? "Digite seu nome completo" : "Nome da empresa"}
                     value={nome}
                     onChange={setNome}
                     erro={erros.nome}
@@ -112,7 +102,7 @@ export default function Cadastro() {
                 <Campo
                     label="Email Institucional"
                     type="email"
-                    placeholder={aba === "aluno" ? "seu.nome@aluno.feliz.ifrs.edu.br" : "contato@empresa.com.br"}
+                    placeholder={ehAluno ? "seu.nome@aluno.feliz.ifrs.edu.br" : "contato@empresa.com.br"}
                     value={email}
                     onChange={setEmail}
                     erro={erros.email}
@@ -120,11 +110,11 @@ export default function Cadastro() {
 
                 <div className="grid grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1">
-                        <label className="text-sm font-medium text-text-primary">Senha</label>
+                        <label className="text-sm font-medium text-text-primary">Nova Senha</label>
                         <div className="relative">
                             <input
                                 type={mostrarSenha ? "text" : "password"}
-                                placeholder="••••••••"
+                                placeholder="Deixe em branco para manter"
                                 value={senha}
                                 onChange={(e) => setSenha(e.target.value)}
                                 className="w-full rounded-md border border-border px-4 py-2 pr-16 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
@@ -139,7 +129,7 @@ export default function Cadastro() {
                         </div>
                         {erros.senha && <p className="text-xs text-red-600">{erros.senha}</p>}
                     </div>
-                    {aba === "aluno" ? (
+                    {ehAluno ? (
                         <Campo
                             label="Data de Nascimento"
                             type="date"
@@ -166,7 +156,7 @@ export default function Cadastro() {
                         onChange={setTelefone}
                         erro={erros.telefone}
                     />
-                    {aba === "aluno" && (
+                    {ehAluno && (
                         <div className="flex flex-col gap-1">
                             <label className="text-sm font-medium text-text-primary">Curso</label>
                             <select
@@ -184,19 +174,11 @@ export default function Cadastro() {
                     )}
                 </div>
 
-                <label className="flex items-center gap-2 text-sm text-text-muted">
-                    <input
-                        type="checkbox"
-                        className="accent-primary"
-                        checked={aceito}
-                        onChange={(e) => setAceito(e.target.checked)}
-                    />
-                    Eu aceito os{" "}
-                    <Link to="/termos" className="text-primary">Termos de Uso</Link>
-                    {" "}e{" "}
-                    <Link to="/privacidade" className="text-primary">Política de Privacidade</Link>.
-                </label>
-                {erros.aceito && <p className="text-xs text-red-600">{erros.aceito}</p>}
+                {salvo && (
+                    <p className="rounded-md bg-background-success px-4 py-2 text-sm text-primary">
+                        Dados atualizados com sucesso!
+                    </p>
+                )}
 
                 {erroGeral && (
                     <p className="rounded-md bg-red-50 px-4 py-2 text-sm text-red-600">
@@ -208,14 +190,9 @@ export default function Cadastro() {
                     type="submit"
                     className="mt-2 rounded-lg bg-primary py-3 text-sm font-medium text-white hover:bg-primary-dark transition-colors"
                 >
-                    Criar minha conta
+                    Salvar Alterações
                 </button>
             </form>
-
-            <p className="mt-5 text-center text-sm text-text-muted">
-                Já possui uma conta?{" "}
-                <Link to="/login" className="font-medium text-primary">Faça Login</Link>
-            </p>
         </Card>
     );
 }

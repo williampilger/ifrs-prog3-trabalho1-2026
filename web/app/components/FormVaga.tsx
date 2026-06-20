@@ -1,26 +1,20 @@
 import { useState } from "react";
-import { z } from "zod";
 import { MdArrowBack, MdSend } from "react-icons/md";
+import { Link } from "react-router";
 import Card from "./Card";
 import Campo from "./Campo";
-import { Link } from "react-router";
 
-const schemaVaga = z.object({
-    vaga: z.string().min(3, "Título deve ter ao menos 3 caracteres"),
-    curso: z.string().min(1, "Selecione um curso"),
-    localidade: z.string().min(2, "Informe a localidade"),
-    modalidade: z.string().min(1, "Selecione uma modalidade"),
-    cargaHoraria: z.string().min(1, "Selecione a carga horária"),
-    salario: z
-        .string()
-        .min(1, "Informe o valor da bolsa")
-        .refine((v) => Number(v) > 0, "O valor deve ser maior que zero"),
-    beneficios: z.array(z.string()),
-    descricaoAtividades: z.string().min(10, "Descreva as atividades com mais detalhes"),
-    descricaoHabilidades: z.string().min(10, "Descreva os requisitos com mais detalhes"),
-});
-
-export type DadosVaga = z.infer<typeof schemaVaga>;
+export type DadosVaga = {
+    vaga: string;
+    curso: string;
+    localidade: string;
+    modalidade: string;
+    cargaHoraria: string;
+    salario: string;
+    beneficios: string[];
+    descricaoAtividades: string;
+    descricaoHabilidades: string;
+};
 
 const opcoesCurso = [
     { valor: "ads", label: "Análise e Desenvolvimento de Sistemas" },
@@ -65,6 +59,7 @@ type FormVagaProps = {
     descricao: string;
     textoBotao: string;
     valoresIniciais?: DadosVaga;
+    erros?: Record<string, string>;
     onSubmit: (dados: DadosVaga) => void;
 };
 
@@ -73,6 +68,7 @@ export default function FormVaga({
     descricao,
     textoBotao,
     valoresIniciais = valoresVazios,
+    erros = {},
     onSubmit,
 }: FormVagaProps) {
     const [vaga, setVaga] = useState(valoresIniciais.vaga);
@@ -84,7 +80,6 @@ export default function FormVaga({
     const [beneficios, setBeneficios] = useState<string[]>(valoresIniciais.beneficios);
     const [descricaoAtividades, setDescricaoAtividades] = useState(valoresIniciais.descricaoAtividades);
     const [descricaoHabilidades, setDescricaoHabilidades] = useState(valoresIniciais.descricaoHabilidades);
-    const [erros, setErros] = useState<Record<string, string>>({});
 
     function toggle(valor: string) {
         setBeneficios((atual) =>
@@ -92,23 +87,18 @@ export default function FormVaga({
         );
     }
 
-    function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-        e.preventDefault();
-
-        const dados = { vaga, curso, localidade, modalidade, cargaHoraria, salario, beneficios, descricaoAtividades, descricaoHabilidades };
-        const resultado = schemaVaga.safeParse(dados);
-
-        if (!resultado.success) {
-            const novosErros: Record<string, string> = {};
-            for (const erro of resultado.error.issues) {
-                novosErros[erro.path[0] as string] = erro.message;
-            }
-            setErros(novosErros);
-            return;
-        }
-
-        setErros({});
-        onSubmit(resultado.data);
+    function handleSubmit() {
+        onSubmit({
+            vaga,
+            curso,
+            localidade,
+            modalidade,
+            cargaHoraria,
+            salario,
+            beneficios,
+            descricaoAtividades,
+            descricaoHabilidades,
+        });
     }
 
     return (
@@ -124,7 +114,13 @@ export default function FormVaga({
             <Card className="max-w-4xl mx-auto mt-4 bg-background">
                 <h2 className="font-bold text-text-secondary">{titulo}</h2>
                 <p className="mt-2 mb-6 text-sm text-text-muted">{descricao}</p>
-                <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+                <form
+                    className="flex flex-col gap-4"
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        handleSubmit();
+                    }}
+                >
                     <Campo
                         label="Título da Vaga"
                         placeholder="Ex: Desenvolvedor Frontend"

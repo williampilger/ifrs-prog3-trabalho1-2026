@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { useNavigate } from "react-router";
 import FormVaga, { type DadosVaga } from "../components/FormVaga";
 
 // Mock da vaga sendo editada (depois virá do loader pela URL)
@@ -14,9 +16,30 @@ const vagaExistente: DadosVaga = {
 };
 
 export default function EditarVaga() {
-    function handleSubmit(dados: DadosVaga) {
-        console.log("Vaga atualizada:", dados);
-        // depois: PUT para a API
+    const [erros, setErros] = useState<Record<string, string>>({});
+    const navigate = useNavigate();
+
+    async function handleSubmit(dados: DadosVaga) {
+        setErros({});
+        try {
+            const resposta = await fetch("http://localhost:3333/vagas/1", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify(dados),
+            });
+
+            const retorno = await resposta.json();
+
+            if (!resposta.ok) {
+                if (retorno.erros) setErros(retorno.erros);
+                return;
+            }
+
+            navigate("/empresa");
+        } catch {
+            setErros({ vaga: "Erro de conexão com o servidor." });
+        }
     }
 
     return (
@@ -25,6 +48,7 @@ export default function EditarVaga() {
             descricao="Altere os campos abaixo e salve as mudanças desta vaga de estágio."
             textoBotao="Salvar Alterações"
             valoresIniciais={vagaExistente}
+            erros={erros}
             onSubmit={handleSubmit}
         />
     );

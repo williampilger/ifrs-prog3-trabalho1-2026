@@ -1,7 +1,5 @@
-import { PrismaClient } from "@prisma/client";
 import { createHash } from "crypto";
-
-const prisma = new PrismaClient();
+import { prisma } from "../src/lib/prisma.js";
 
 const md5 = (s: string) => createHash("md5").update(s).digest("hex");
 
