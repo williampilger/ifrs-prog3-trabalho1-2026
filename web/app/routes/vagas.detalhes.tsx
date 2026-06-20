@@ -163,7 +163,7 @@ ${aluno.nome}`;
                                     </pre>
                                     <button
                                         onClick={copiarMensagem}
-                                        className="flex items-center justify-center gap-2 rounded-lg border border-border py-2 text-sm font-medium text-text-primary hover:bg-background-alt transition-colors"
+                                        className="flex items-center justify-center bg-primary text-white gap-2 rounded-lg border border-border py-2 text-sm font-medium text-text-primary"
                                     >
                                         {copiado ? (
                                             <>

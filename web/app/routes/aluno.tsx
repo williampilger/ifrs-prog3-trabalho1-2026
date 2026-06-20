@@ -5,11 +5,12 @@ import CardVagaDisponivel from "../components/CardVagaDisponivel";
 
 export default function Aluno() {
     const [pesquisa, setPesquisa] = useState("");
+    const [curso, setCurso] = useState("");
 
     return (
         <div>
-            <section className="grid grid-cols-5 gap-8">
-                <div className="col-span-1">
+            <section className="grid grid-cols-6 gap-8">
+                <div className="col-span-2">
                     <Card className="w-full bg-background border border-border">
                         <h3>Filtros</h3>
                         <Campo
@@ -19,6 +20,32 @@ export default function Aluno() {
                             value={pesquisa}
                             onChange={setPesquisa}
                         />
+                        <div className="flex flex-col gap-1 mt-4">
+                            <label className="text-sm font-medium text-text-primary">Curso</label>
+                            <select
+                                value={curso}
+                                onChange={(e) => setCurso(e.target.value)}
+                                className="rounded-md border border-border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                            >
+                                <option value="">Selecione seu curso</option>
+                                <option value="info">Informática</option>
+                                <option value="quimica">Química</option>
+                                <option value="admin">Administração</option>
+                            </select>
+                        </div>
+                        <div className="flex flex-col gap-1 mt-4">
+                            <label className="text-sm font-medium text-text-primary">Cidade</label>
+                            <select
+                                value={curso}
+                                onChange={(e) => setCurso(e.target.value)}
+                                className="rounded-md border border-border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                            >
+                                <option value="">Selecione a cidade</option>
+                                <option value="bomPrincipio">Bom Princípio</option>
+                                <option value="feliz">Feliz</option>
+                                <option value="saoSebastiao">São Sebastião do Caí</option>
+                            </select>
+                        </div>
                     </Card>
                 </div>
                 <div className="col-span-4">

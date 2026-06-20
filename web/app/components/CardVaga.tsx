@@ -9,6 +9,7 @@ import {
     MdDelete,
     MdCheckCircle,
 } from "react-icons/md";
+import { Link } from "react-router";
 
 type CardVagaProps = {
     titulo: string;
@@ -69,9 +70,11 @@ export default function CardVaga({
                     </div>
                 </div>
                 <div className="flex flex-col items-center justify-between gap-4 self-stretch">
-                    <button className="text-text-primary hover:text-primary" title="Editar">
-                        <MdEdit size={24} />
-                    </button>
+                    <Link to="/empresa/vagas/editar">
+                        <button className="text-text-primary hover:text-primary" title="Editar">
+                            <MdEdit size={24} />
+                        </button>
+                    </Link>
                     <button
                         onClick={() => setPreenchida((v) => !v)}
                         className={preenchida ? "text-primary" : "text-text-muted hover:text-primary"}
