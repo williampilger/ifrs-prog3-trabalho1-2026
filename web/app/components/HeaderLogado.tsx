@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { MdLogout, MdPerson, MdKeyboardArrowDown } from "react-icons/md";
+import { useAuth } from "../lib/auth";
 
 type HeaderLogadoProps = {
     nome: string;
@@ -9,6 +10,13 @@ type HeaderLogadoProps = {
 
 export default function HeaderLogado({ nome, iniciais }: HeaderLogadoProps) {
     const [aberto, setAberto] = useState(false);
+    const { logout } = useAuth();
+    const navigate = useNavigate();
+
+    async function handleLogout() {
+        await logout();
+        navigate("/login");
+    }
 
     return (
         <header className="bg-background border-b border-border flex items-center justify-between px-8 py-5">
@@ -46,7 +54,7 @@ export default function HeaderLogado({ nome, iniciais }: HeaderLogadoProps) {
                             Editar Perfil
                         </Link>
                         <button
-                            onClick={() => console.log("logout")}
+                            onClick={handleLogout}
                             className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-background-alt"
                         >
                             <MdLogout size={18} />

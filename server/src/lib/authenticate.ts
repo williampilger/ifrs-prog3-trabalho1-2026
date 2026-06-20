@@ -7,7 +7,9 @@ import { tryCatchErrorStringify } from "./tools.js";
 
 export type jwtUserType = {
     id: number,
-    username: string
+    username: string,
+    nome: string,
+    tipo: "aluno" | "empresa"
 }
 
 export const jwtUserSchema = z.object({
@@ -18,6 +20,8 @@ export const jwtUserSchema = z.object({
     // CUSTOM FIELDS
     id: z.number(),
     username: z.string(),
+    nome: z.string(),
+    tipo: z.enum(["aluno", "empresa"]),
 }).strict();
 
 export async function jwtVerify(request:FastifyRequest, tryRenew:boolean=true):Promise<boolean> {

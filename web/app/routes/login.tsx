@@ -1,7 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import { MdSchool, MdVisibility, MdVisibilityOff } from "react-icons/md";
 import Card from "../components/Card";
 import Campo from "../components/Campo";
+import { api } from "../lib/api";
+import { useAuth } from "../lib/auth";
 
 export default function Login() {
     const [email, setEmail] = useState("");
@@ -9,16 +12,16 @@ export default function Login() {
     const [erros, setErros] = useState<Record<string, string>>({});
     const [erroGeral, setErroGeral] = useState("");
     const [mostrarSenha, setMostrarSenha] = useState(false);
+    const navigate = useNavigate();
+    const { recarregar } = useAuth();
 
     async function handleSubmit() {
         setErros({});
         setErroGeral("");
 
         try {
-            const resposta = await fetch("http://localhost:3333/login", {
+            const resposta = await api("/login", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
                 body: JSON.stringify({ email, senha }),
             });
 
@@ -33,7 +36,15 @@ export default function Login() {
                 return;
             }
 
-            console.log("Login OK:", dados);
+            // Login OK: o cookie já foi setado pelo backend.
+            // Recarrega o contexto de auth para saber quem é e redireciona.
+            await recarregar();
+
+            const respAuth = await api("/auth");
+            const dadosAuth = await respAuth.json();
+            const tipo = dadosAuth?.usuario?.tipo;
+
+            navigate(tipo === "empresa" ? "/empresa" : "/aluno");
         } catch {
             setErroGeral("Erro de conexão com o servidor.");
         }

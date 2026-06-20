@@ -27,6 +27,34 @@ async function main() {
         }),
     ]);
 
+    const beneficios = await Promise.all([
+        prisma.beneficio.upsert({
+            where: { nome: "Vale Transporte" },
+            update: {},
+            create: { nome: "Vale Transporte" },
+        }),
+        prisma.beneficio.upsert({
+            where: { nome: "Vale Refeição/Alimentação" },
+            update: {},
+            create: { nome: "Vale Refeição/Alimentação" },
+        }),
+        prisma.beneficio.upsert({
+            where: { nome: "Seguro de Vida" },
+            update: {},
+            create: { nome: "Seguro de Vida" },
+        }),
+        prisma.beneficio.upsert({
+            where: { nome: "Auxílio Remoto" },
+            update: {},
+            create: { nome: "Auxílio Remoto" },
+        }),
+        prisma.beneficio.upsert({
+            where: { nome: "Plano de Saúde" },
+            update: {},
+            create: { nome: "Plano de Saúde" },
+        }),
+    ]);
+
     const senha = md5("Teste53!");
 
     const usuarios = await Promise.all([
@@ -74,6 +102,7 @@ async function main() {
 
     const [, , empresa1, empresa2] = usuarios;
     const [tiInformatica] = areas;
+    const [vt, vr, , auxilioRemoto] = beneficios;
 
     await Promise.all([
         prisma.vaga.upsert({
@@ -90,6 +119,13 @@ async function main() {
                 contatoEmail: "rh@empresa1.com.br",
                 turno: "integral",
                 modalidade: "presencial",
+                salario: 1200,
+                beneficios: {
+                    create: [
+                        { beneficio: { connect: { id: vt.id } } },
+                        { beneficio: { connect: { id: vr.id } } },
+                    ],
+                },
             },
         }),
         prisma.vaga.upsert({
@@ -105,7 +141,14 @@ async function main() {
                 contatoTelefone: "5551999999999",
                 contatoEmail: "rh@empresa1.com.br",
                 turno: "integral",
-                modalidade: "presencial",
+                modalidade: "remoto",
+                salario: 1500,
+                beneficios: {
+                    create: [
+                        { beneficio: { connect: { id: vt.id } } },
+                        { beneficio: { connect: { id: auxilioRemoto.id } } },
+                    ],
+                },
             },
         }),
     ]);

@@ -10,6 +10,8 @@ import { netTestReport } from './lib/netTools.js';
 import { prisma } from './lib/prisma.js';
 import { buildRandomString, tryCatchErrorStringify } from './lib/tools.js';
 import { authRoutes } from './routes/auth.js';
+import { areasRoutes } from './routes/areas.js';
+import { beneficiosRoutes } from './routes/beneficios.js';
 
 const app = fastify({
     logger: false
@@ -32,7 +34,11 @@ app.register(cors, {
 });
 
 app.register(jwt, {
-    secret: ENV.JWT_SECRET // use de .env ou o dfault se tá preenchido la
+    secret: ENV.JWT_SECRET, // use de .env ou o dfault se tá preenchido la
+    cookie: {
+        cookieName: 'token',
+        signed: false
+    }
 });
 
 
@@ -123,8 +129,9 @@ app.setErrorHandler(async (error: FastifyError, request: FastifyRequest, reply) 
         }
     }
 });
-
 app.register(authRoutes);
+app.register(areasRoutes);
+app.register(beneficiosRoutes);
 
 app.get('/', () => {
     return {

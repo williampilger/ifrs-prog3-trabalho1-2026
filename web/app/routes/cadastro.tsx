@@ -40,7 +40,7 @@ export default function Cadastro() {
                 : { nome, email, senha, telefone, cnpj, tipo: "empresa" };
 
         try {
-            const resposta = await fetch("http://localhost:3333/cadastro", {
+            const resposta = await fetch("http://localhost:3000/cadastro", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",

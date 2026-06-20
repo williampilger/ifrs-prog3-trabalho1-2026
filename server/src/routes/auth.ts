@@ -1,79 +1,89 @@
+import { createHash } from "crypto";
 import type { FastifyInstance, FastifyRequest } from "fastify";
 import { z } from "zod";
+import { jwtSign } from "../lib/authenticate.js";
 import { LogSystem } from "../lib/LogSystem.js";
+import { prisma } from "../lib/prisma.js";
+
+const md5 = (s: string) => createHash("md5").update(s).digest("hex");
 
 export async function authRoutes(app: FastifyInstance) {
 
-    app.get('/auth', async (request: FastifyRequest, reply) => {
-
-        //verifica se o usuário está autenticado
-        //Se a seção tiver uma licença, retorna ela junto. 
-        // NÂO CRIA UMA LICENÇA SE NÂO HOUVER UMA
-        if (request.user) {
-
-            // const dbReg = await prisma.user.findFirst({
-            //     where: {
-            //         id: request.user.id,
-            //         deletedAt: null
-            //     }
-            // });
-
-
-            // if (dbReg) {
-
-
-            //     return {
-            //         user: dbReg
-            //     };
-
-            // } else {
-            //     LogSystem.ERROR(2503125548, `Unable to locate this user locally (who was previously created, as they have logged in before)`, request);
-            //     reply.code(500).send('2503125548 - Internal Server Error');
-            // }
-
-            //TODO FALTA IMPLEMENTARRR
-
-            reply.code(501).send('METHOD NOT IMPLEMENTED!');   
-
-
-            reply.code(401).send({ msg: '250224105940 - unhandled response' });
-        } else {
-            reply.code(401).send({ msg: '241004121601 - not authenticated' });
-        }
-    });
-
     /**
-     * Usuário informa login e senha pelo app (essa TENDE a ser a rota MENOS comum, pois o usuário já chega autenticado até o app)
+     * Login: valida email/senha, assina o JWT e o coloca num cookie httpOnly.
      */
-    app.post('/auth/login', async (request: FastifyRequest, reply) => {
+    app.post('/login', async (request: FastifyRequest, reply) => {
 
-        const body = z.object({
-            email: z.string(),
-            password: z.string(),
+        const { email, senha } = z.object({
+            email: z.string().email(),
+            senha: z.string().min(1),
         }).parse(request.body);
 
-        if(request.user && request.user.id > 0){
-            LogSystem.debug(250224101508, `User already authenticated, no need to login again`, request);
-            reply.code(200).send({
-                msg: 'you are already logged in',
-            });
+        // Busca o usuário ativo (ignora contas excluídas via soft delete)
+        const usuario = await prisma.usuario.findFirst({
+            where: { email, excluidoEm: null },
+        });
+
+        // Mensagem genérica: não revela se foi o email ou a senha que falhou
+        if (!usuario || usuario.pswd !== md5(senha)) {
+            LogSystem.warn(250620000001, `Login falhou para o email: ${email}`, request);
+            reply.code(401).send({ mensagem: "Email ou senha inválidos." });
             return;
         }
-        
-        //TODO FALTA IMPLEMENTARRR
 
-        reply.code(501).send('METHOD NOT IMPLEMENTED!');        
+        const token = await jwtSign(app, {
+            id: usuario.id,
+            username: usuario.email,
+            nome: usuario.nome,
+            tipo: usuario.tipo,
+        });
+
+        reply.setCookie('token', token, {
+            httpOnly: true,
+            sameSite: 'lax',
+            path: '/',
+        });
+
+        reply.send({ mensagem: "Login realizado com sucesso." });
     });
 
     /**
-     * Destrói a session do usuário, neste app, E NO DOMÍNIO COMO UM TODO
+     * Retorna os dados do usuário autenticado (o front chama após o login
+     * para saber quem está logado e para qual área redirecionar).
      */
-    app.get('/auth/logout', async (request: FastifyRequest, reply) => {
+    app.get('/auth', async (request: FastifyRequest, reply) => {
 
-        //fazer logout no domínio todo!!
+        if (!request.user) {
+            reply.code(401).send({ mensagem: "Não autenticado." });
+            return;
+        }
 
-        LogSystem.ERROR(240930152006, 'METHOD NOT IMPLEMENTED!', request);
-        reply.code(501).send('METHOD NOT IMPLEMENTED!');
+        const usuario = await prisma.usuario.findFirst({
+            where: { id: request.user.id, excluidoEm: null },
+            select: {
+                id: true,
+                nome: true,
+                email: true,
+                telefone: true,
+                tipo: true,
+            },
+        });
+
+        if (!usuario) {
+            LogSystem.error(250620000002, `Usuário do token não encontrado no banco (id: ${request.user.id})`, request);
+            reply.code(401).send({ mensagem: "Não autenticado." });
+            return;
+        }
+
+        reply.send({ usuario });
+    });
+
+    /**
+     * Logout: remove o cookie do token.
+     */
+    app.get('/logout', async (request: FastifyRequest, reply) => {
+        reply.clearCookie('token', { path: '/' });
+        reply.send({ mensagem: "Logout realizado." });
     });
 
 }

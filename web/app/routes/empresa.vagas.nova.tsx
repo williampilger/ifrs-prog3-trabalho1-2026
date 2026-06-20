@@ -9,7 +9,7 @@ export default function NovaVaga() {
     async function handleSubmit(dados: DadosVaga) {
         setErros({});
         try {
-            const resposta = await fetch("http://localhost:3333/vagas", {
+            const resposta = await fetch("http://localhost:3000/vagas", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",

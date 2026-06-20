@@ -70,6 +70,8 @@ model Vaga {
   empresaId       Int
   turno           Turno
   modalidade      Modalidade
+  salario         Float?
+  preenchida      Boolean    @default(false)
   local           String?
   contatoNome     String?
   contatoTelefone String?
@@ -77,8 +79,29 @@ model Vaga {
   criadoEm        DateTime   @default(now())
   excluidoEm      DateTime?
 
-  area    Area    @relation(fields: [areaId], references: [id])
-  empresa Usuario @relation(fields: [empresaId], references: [id])
+  area       Area            @relation(fields: [areaId], references: [id])
+  empresa    Usuario         @relation(fields: [empresaId], references: [id])
+  beneficios VagaBeneficio[]
 
   @@map("vagas")
+}
+
+model Beneficio {
+  id   Int    @id @default(autoincrement())
+  nome String @unique
+
+  vagas VagaBeneficio[]
+
+  @@map("beneficios")
+}
+
+model VagaBeneficio {
+  vagaId      Int
+  beneficioId Int
+
+  vaga      Vaga      @relation(fields: [vagaId], references: [id])
+  beneficio Beneficio @relation(fields: [beneficioId], references: [id])
+
+  @@id([vagaId, beneficioId])
+  @@map("vaga_beneficio")
 }
