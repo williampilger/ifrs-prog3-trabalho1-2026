@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { exec } from 'child_process';
 import util from 'util';
-import { LogSystem } from './LogSystem';
+import { LogSystem } from './LogSystem.js';
 
 const execPromise = util.promisify(exec);
 

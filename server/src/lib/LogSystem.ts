@@ -1,18 +1,20 @@
 import type { FastifyRequest } from "fastify";
+import { appendFile } from 'fs/promises';
 import pino from "pino";
 import ENV from "./environmentConstants.js";
 
-
 const logger = pino({
     level: ENV.LOG_LEVEL,
-    transport: ENV.LOG_PRETTY ? {
-        target: 'pino-pretty',
-        options: {
-            colorize: true,
-            translateTime: 'SYS:standard',
-            ignore: 'pid,hostname'
+    ...(ENV.LOG_PRETTY ? {
+        transport: {
+            target: 'pino-pretty',
+            options: {
+                colorize: true,
+                translateTime: 'SYS:standard',
+                ignore: 'pid,hostname'
+            }
         }
-    } : undefined
+    } : {})
 });
 
 const CATEGORIES = [
@@ -24,10 +26,8 @@ const CATEGORIES = [
     'FATAL'    // 5
 ];
 
-// Helper to parse browser name and version from user-agent string
 function parseBrowser(userAgent: string | undefined): string {
     if (!userAgent) return '';
-    // Simple regex for major browsers
     const browsers = [
         { name: 'Edge', regex: /Edg\/([\d.]+)/ },
         { name: 'Chrome', regex: /Chrome\/([\d.]+)/ },
@@ -38,36 +38,32 @@ function parseBrowser(userAgent: string | undefined): string {
     ];
     for (const b of browsers) {
         const match = userAgent.match(b.regex);
-        if (match) return `${b.name} ${match[1]}`;
+        if (match) return `${b.name} ${match[1] ?? ''}`;
     }
-    return userAgent.split(' ')[0]; // fallback
+    return userAgent.split(' ')[0] ?? '';
 }
 
-// Helper to parse OS name and version from user-agent string
-    function parseOS(userAgent: string | undefined): string {
-        if (!userAgent) return '';
-        // Common OS patterns
-        const osList = [
-            { name: 'Windows', regex: /Windows NT ([\d.]+)/ },
-            { name: 'macOS', regex: /Mac OS X ([\d_]+)/ },
-            { name: 'Linux', regex: /Linux ([^;)\s]*)/ },
-            { name: 'Android', regex: /Android ([\d.]+)/ },
-            { name: 'iOS', regex: /iPhone OS ([\d_]+)/ }
-        ];
-        for (const os of osList) {
-            const match = userAgent.match(os.regex);
-            if (match) {
-                let version = match[1].replace(/_/g, '.');
-                return `${os.name} ${version}`;
-            }
+function parseOS(userAgent: string | undefined): string {
+    if (!userAgent) return '';
+    const osList = [
+        { name: 'Windows', regex: /Windows NT ([\d.]+)/ },
+        { name: 'macOS', regex: /Mac OS X ([\d_]+)/ },
+        { name: 'Linux', regex: /Linux ([^;)\s]*)/ },
+        { name: 'Android', regex: /Android ([\d.]+)/ },
+        { name: 'iOS', regex: /iPhone OS ([\d_]+)/ }
+    ];
+    for (const os of osList) {
+        const match = userAgent.match(os.regex);
+        if (match) {
+            const version = (match[1] ?? '').replace(/_/g, '.');
+            return `${os.name} ${version}`;
         }
-        return '';
     }
+    return '';
+}
 
 const logFormat = (code: number, content: string, request: FastifyRequest | null) => {
-
     const browserInfo = parseBrowser(request?.headers['user-agent']);
-
     const osInfo =
         request?.headers['sec-ch-ua-platform-version']
             ? `${request.headers['sec-ch-ua-platform'] || ''} ${request.headers['sec-ch-ua-platform-version']}`
@@ -86,16 +82,15 @@ const logFormat = (code: number, content: string, request: FastifyRequest | null
             system: osInfo,
             referer: request.headers['referer'] || request.headers['referrer'] || ''
         }
-    }
-}
+    };
+};
 
-const saveJsonToFile = async (data: any, filePath: string = 'out.log') => {
-    if ( ! ENV.SAVE_LOG_TO_FILE) return;
+const saveJsonToFile = async (data: unknown, filePath: string = 'out.log') => {
+    if (!ENV.SAVE_LOG_TO_FILE) return;
     try {
-        const fs = require('fs').promises;
-        await fs.appendFile(filePath, JSON.stringify(data) + '\n', 'utf8');
-    } catch (error) {}
-}
+        await appendFile(filePath, JSON.stringify(data) + '\n', 'utf8');
+    } catch {}
+};
 
 export const LogSystem = {
 
@@ -134,7 +129,7 @@ export const LogSystem = {
         logger.error(logFormat(code, content, request));
         saveJsonToFile(logFormat(code, content, request));
     },
-    
+
     ERROR: async (code: number, content: string, request: FastifyRequest | null) => {
         LogSystem.error(code, content, request);
         saveJsonToFile(logFormat(code, content, request));
@@ -146,4 +141,4 @@ export const LogSystem = {
         saveJsonToFile(logFormat(code, content, request));
         //TODO enviar TAMBÉM para o sistema de monitoramento
     }
-}
+};

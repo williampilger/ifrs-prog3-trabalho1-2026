@@ -1,7 +1,12 @@
+import { PrismaLibSql } from "@prisma/adapter-libsql";
 import { PrismaClient } from "@prisma/client";
-import { LogSystem } from "./LogSystem"; // ajuste o caminho conforme necessário
+import ENV from "./environmentConstants.js";
+import { LogSystem } from "./LogSystem.js";
+
+const adapter = new PrismaLibSql({ url: ENV.DATABASE_URL });
 
 export const prisma = new PrismaClient({
+    adapter,
     log: [
         { emit: 'event', level: 'info' },
         { emit: 'event', level: 'warn' },

@@ -1,7 +1,7 @@
 import fastifyCookie from '@fastify/cookie';
 import cors from '@fastify/cors';
 import jwt from '@fastify/jwt';
-import fastify, { type FastifyRequest } from 'fastify';
+import fastify, { type FastifyError, type FastifyRequest } from 'fastify';
 import { ZodError } from 'zod';
 import { LogSystem } from './lib/LogSystem.js';
 import { jwtUserSchema, jwtVerify } from './lib/authenticate.js';
@@ -83,16 +83,15 @@ app.addHook('onSend', (request: FastifyRequest, reply, payload,done) => {
     done();
 });
 
-app.setErrorHandler(async (error, request: FastifyRequest, reply) => {
-    
+app.setErrorHandler(async (error: FastifyError, request: FastifyRequest, reply) => {
+
     const statusCode = error.statusCode ?? 500;
 
     if (error instanceof ZodError) {
-        // Erro de validação do Zod
-        LogSystem.error(250515155929, `Zod Validation error: ${JSON.stringify(error.errors)}`, request);
+        LogSystem.error(250515155929, `Zod Validation error: ${JSON.stringify(error.issues)}`, request);
         reply.status(422).send({
             message: "Zod Validation error",
-            issues: error.errors, // Detalhes do erro de validação
+            issues: error.issues,
         });
         return;
     }
@@ -109,12 +108,10 @@ app.setErrorHandler(async (error, request: FastifyRequest, reply) => {
     }), request);
 
     if (ENV.SUPPRESS_RESPONSE_ERROR_MESSAGES) {
-        //If it is in production, all error responses will be generic (so, you can see the full error description in the logs)
         reply.status(500).send(`Code 250515155931:${request.reqID} - Internal Server Error - Contact the Support Team for more Information`);
     } else {
 
-        if (statusCode < 400) {// código inválido para um erro — força 500
-
+        if (statusCode < 400) {
             LogSystem.ERROR(250515160000, `Status 500 was returned instead of ${statusCode} - ${error.message}`, request);
             reply.status(500).send(`Code 250515155931:${request.reqID} - Internal Server Error`);
         } else {
