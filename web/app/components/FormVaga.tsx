@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { MdArrowBack, MdSend } from "react-icons/md";
 import { Link } from "react-router";
-import Card from "./Card";
 import Campo from "./Campo";
+import Card from "./Card";
+import SelectCurso from "./SelectCurso";
 
 export type DadosVaga = {
     vaga: string;
@@ -15,12 +16,6 @@ export type DadosVaga = {
     descricaoAtividades: string;
     descricaoHabilidades: string;
 };
-
-const opcoesCurso = [
-    { valor: "ads", label: "Análise e Desenvolvimento de Sistemas" },
-    { valor: "cc", label: "Ciência da Computação" },
-    { valor: "si", label: "Sistemas de Informação" },
-];
 
 const opcoesModalidade = [
     { valor: "presencial", label: "Presencial" },
@@ -132,16 +127,7 @@ export default function FormVaga({
                     <div className="grid grid-cols-2 gap-4">
                         <div className="flex flex-col gap-1">
                             <label className="text-sm font-medium text-text-primary">Curso</label>
-                            <select
-                                value={curso}
-                                onChange={(e) => setCurso(e.target.value)}
-                                className="rounded-md border border-border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                            >
-                                <option value="">Selecione seu curso</option>
-                                {opcoesCurso.map((o) => (
-                                    <option key={o.valor} value={o.valor}>{o.label}</option>
-                                ))}
-                            </select>
+                            <SelectCurso curso={curso} onChange={ n => setCurso(n)}/>
                             {erros.curso && <p className="text-xs text-red-600">{erros.curso}</p>}
                         </div>
                         <Campo

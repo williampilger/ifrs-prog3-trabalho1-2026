@@ -1,15 +1,8 @@
 import { useEffect } from "react";
 import { Outlet, useNavigate } from "react-router";
-import HeaderLogado from "../components/HeaderLogado";
+import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { useAuth } from "../lib/auth";
-
-function iniciaisDoNome(nome: string) {
-    const partes = nome.trim().split(/\s+/);
-    const primeira = partes[0]?.[0] ?? "";
-    const ultima = partes.length > 1 ? partes[partes.length - 1][0] : "";
-    return (primeira + ultima).toUpperCase();
-}
 
 export default function PrivadoLayout() {
     const { usuario, carregando } = useAuth();
@@ -33,7 +26,7 @@ export default function PrivadoLayout() {
 
     return (
         <div className="flex flex-col min-h-screen bg-background-alt">
-            <HeaderLogado nome={usuario.nome} iniciais={iniciaisDoNome(usuario.nome)} />
+            <Header />
             <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-8">
                 <Outlet />
             </main>
