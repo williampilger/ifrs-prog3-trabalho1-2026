@@ -11,6 +11,7 @@ import {
     MdSchool,
 } from "react-icons/md";
 import { Link, useParams } from "react-router";
+import type { Vaga } from "~/api/types";
 import API from "../api/api";
 import Card from "../components/Card";
 import { useAuth } from "../lib/auth";
@@ -151,11 +152,11 @@ ${usuario.nome}` : "";
                             <ul className="mt-3 flex flex-col gap-2">
                                 {vaga.beneficios.map((vb) => (
                                     <li
-                                        key={vb.beneficio.nome}
+                                        key={vb.nome}
                                         className="flex items-center gap-2 text-text-primary"
                                     >
                                         <MdCheckCircle className="text-primary" />
-                                        {vb.beneficio.nome}
+                                        {vb.nome}
                                     </li>
                                 ))}
                             </ul>

@@ -6,35 +6,23 @@ export type Usuario = {
     email: string;
     telefone: string | null;
     tipo: UsuarioTipo;
-    nascimento?: string;
-    curso?: string;
-    cnpj?: string;
+
+    //optionais (depende do tipo)
+    nascimento?: string; // para alunos
+    curso?: string; // para alunos
+    cnpj?: string; // para empresas
 };
 
-export type DadosCadastro = {
-    nome: string;
-    email: string;
-    senha: string;
-    telefone: string;
-    tipo: UsuarioTipo;
-    nascimento?: string;
-    curso?: string;
-    cnpj?: string;
-};
-
-export type DadosVagaAPI = {
-    titulo: string;
+export type Aluno = Usuario & {
+    tipo: 'aluno',
+    nascimento: string;
     curso: string;
-    turno: string;
-    modalidade: string;
-    salario: number | null;
-    local?: string;
-    descricaoAtividades: string;
-    descricaoHabilidades?: string;
-    beneficios: string[];
-    contatoNome?: string;
-    contatoTelefone?: string;
-    contatoEmail?: string;
+    
+};
+export type Empresa = Usuario & {
+    tipo: 'empresa'
+    cnpj: string;
+
 };
 
 export type Beneficio = {
@@ -42,22 +30,31 @@ export type Beneficio = {
     nome: string;
 };
 
-export type Empresa = {
-    //todo FALTA FAZER
-}:
+export type Turno = 'integral' | 'manha' | 'tarde' | 'noite';
+export type Modalidade = 'presencial' | 'remoto' | 'hibrido';
+
+export type Area = { 
+    id: number,
+    nome: string
+}
 
 export type Vaga = {
     id: number;
     titulo: string;
     descricao: string;
-    area: { nome: string };// isso ainda é meio temporário
+    areaId: number;
+    area: Area;
+    empresaId: number;
     empresa: Empresa;
     local: string | null;
-    modalidade: string;
-    turno: string;
+    modalidade: Modalidade;
+    turno: Turno;
     salario: number | null;
+    preenchida: boolean;
     beneficios: Beneficio[];
     contatoNome: string | null;
     contatoEmail: string | null;
     contatoTelefone: string | null;
+    criadoEm: string;
+    excluidoEm: string | null;
 };

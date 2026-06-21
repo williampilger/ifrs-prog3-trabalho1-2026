@@ -1,25 +1,11 @@
 import { useEffect, useState } from "react";
 import { MdAdd, MdArrowBack, MdClose, MdSend } from "react-icons/md";
 import { Link } from "react-router";
+import type { Vaga } from "~/api/types";
 import API from "../api/api";
 import Campo from "./Campo";
 import Card from "./Card";
 import SelectCurso from "./SelectCurso";
-
-export type DadosVaga = {
-    titulo: string;
-    curso: string;
-    local: string;
-    modalidade: string;
-    turno: string;
-    salario: string;
-    beneficios: string[];
-    descricaoAtividades: string;
-    descricaoHabilidades: string;
-    contatoNome: string;
-    contatoTelefone: string;
-    contatoEmail: string;
-};
 
 const opcoesModalidade = [
     { valor: "presencial", label: "Presencial" },
@@ -34,7 +20,7 @@ const opcoesTurno = [
     { valor: "noite", label: "Noite" },
 ];
 
-const valoresVazios: DadosVaga = {
+const valoresVazios: Vaga = {
     titulo: "",
     curso: "",
     local: "",

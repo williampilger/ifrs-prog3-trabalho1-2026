@@ -1,18 +1,19 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import API from "../api/api";
-import FormVaga, { type DadosVaga } from "../components/FormVaga";
+import type { Vaga } from "../api/types";
+import FormVaga from "../components/FormVaga";
 
-function vagaParaForm(vaga: any): DadosVaga {
-    const partes = (vaga.descricao as string).split("\n\n");
+function vagaParaForm(vaga: Vaga): Vaga {
+    const partes = vaga.descricao.split("\n\n");
     return {
         titulo: vaga.titulo,
-        curso: vaga.area?.nome ?? "",
+        curso: vaga.area.nome,
         local: vaga.local ?? "",
         modalidade: vaga.modalidade,
         turno: vaga.turno,
         salario: vaga.salario != null ? String(vaga.salario) : "",
-        beneficios: (vaga.beneficios as any[]).map((vb) => vb.beneficio.nome),
+        beneficios: vaga.beneficios.map((b) => b.nome),
         descricaoAtividades: partes[0] ?? "",
         descricaoHabilidades: partes.slice(1).join("\n\n"),
         contatoNome: vaga.contatoNome ?? "",
@@ -25,7 +26,7 @@ export default function EditarVaga() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
 
-    const [valoresIniciais, setValoresIniciais] = useState<DadosVaga | null>(null);
+    const [valoresIniciais, setValoresIniciais] = useState<Vaga | null>(null);
     const [erros, setErros] = useState<Record<string, string>>({});
     const [carregando, setCarregando] = useState(true);
 
@@ -39,22 +40,21 @@ export default function EditarVaga() {
             .finally(() => setCarregando(false));
     }, [id]);
 
-    async function handleSubmit(dados: DadosVaga) {
+    async function handleSubmit(dados: Vaga) {
         setErros({});
         try {
             const r = await API.vagas.update(id!, {
                 titulo: dados.titulo,
-                curso: dados.curso,
                 turno: dados.turno,
                 modalidade: dados.modalidade,
                 salario: dados.salario ? Number(dados.salario) : null,
-                local: dados.local || undefined,
+                local: dados.local || null,
                 descricaoAtividades: dados.descricaoAtividades,
                 descricaoHabilidades: dados.descricaoHabilidades || undefined,
                 beneficios: dados.beneficios,
-                contatoNome: dados.contatoNome || undefined,
-                contatoTelefone: dados.contatoTelefone || undefined,
-                contatoEmail: dados.contatoEmail || undefined,
+                contatoNome: dados.contatoNome || null,
+                contatoTelefone: dados.contatoTelefone || null,
+                contatoEmail: dados.contatoEmail || null,
             });
 
             if (!r.success) {
