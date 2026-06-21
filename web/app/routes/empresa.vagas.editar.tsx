@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
+import API from "../api/api";
 import FormVaga, { type DadosVaga } from "../components/FormVaga";
-import { api } from "../lib/api";
 
 function vagaParaForm(vaga: any): DadosVaga {
     const partes = (vaga.descricao as string).split("\n\n");
@@ -30,10 +30,9 @@ export default function EditarVaga() {
     const [carregando, setCarregando] = useState(true);
 
     useEffect(() => {
-        api(`/vagas/${id}`)
-            .then((r) => r.json())
-            .then((data) => {
-                if (data.vaga) setValoresIniciais(vagaParaForm(data.vaga));
+        API.vagas.get(id!)
+            .then((r) => {
+                if (r.success && r.data?.vaga) setValoresIniciais(vagaParaForm(r.data.vaga));
                 else setErros({ titulo: "Vaga não encontrada." });
             })
             .catch(() => setErros({ titulo: "Erro ao carregar a vaga." }))
@@ -43,29 +42,24 @@ export default function EditarVaga() {
     async function handleSubmit(dados: DadosVaga) {
         setErros({});
         try {
-            const resposta = await api(`/vagas/${id}`, {
-                method: "PUT",
-                body: JSON.stringify({
-                    titulo: dados.titulo,
-                    curso: dados.curso,
-                    turno: dados.turno,
-                    modalidade: dados.modalidade,
-                    salario: dados.salario ? Number(dados.salario) : null,
-                    local: dados.local || undefined,
-                    descricaoAtividades: dados.descricaoAtividades,
-                    descricaoHabilidades: dados.descricaoHabilidades || undefined,
-                    beneficios: dados.beneficios,
-                    contatoNome: dados.contatoNome || undefined,
-                    contatoTelefone: dados.contatoTelefone || undefined,
-                    contatoEmail: dados.contatoEmail || undefined,
-                }),
+            const r = await API.vagas.update(id!, {
+                titulo: dados.titulo,
+                curso: dados.curso,
+                turno: dados.turno,
+                modalidade: dados.modalidade,
+                salario: dados.salario ? Number(dados.salario) : null,
+                local: dados.local || undefined,
+                descricaoAtividades: dados.descricaoAtividades,
+                descricaoHabilidades: dados.descricaoHabilidades || undefined,
+                beneficios: dados.beneficios,
+                contatoNome: dados.contatoNome || undefined,
+                contatoTelefone: dados.contatoTelefone || undefined,
+                contatoEmail: dados.contatoEmail || undefined,
             });
 
-            const retorno = await resposta.json();
-
-            if (!resposta.ok) {
-                if (retorno.erros) setErros(retorno.erros);
-                else setErros({ titulo: retorno.mensagem ?? "Erro ao salvar vaga." });
+            if (!r.success) {
+                if (r.data?.erros) setErros(r.data.erros);
+                else setErros({ titulo: r.data?.mensagem ?? "Erro ao salvar vaga." });
                 return;
             }
 

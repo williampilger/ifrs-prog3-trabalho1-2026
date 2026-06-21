@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { MdAdd, MdArrowBack, MdClose, MdSend } from "react-icons/md";
 import { Link } from "react-router";
-import { api } from "../lib/api";
+import API from "../api/api";
 import Campo from "./Campo";
 import Card from "./Card";
 import SelectCurso from "./SelectCurso";
@@ -86,9 +86,10 @@ export default function FormVaga({
     const [customInput, setCustomInput] = useState("");
 
     useEffect(() => {
-        api("/beneficios")
-            .then((r) => r.json())
-            .then((data: BeneficioSugestao[]) => {
+        API.beneficios.list()
+            .then((r) => {
+                if (!r.success) throw new Error();
+                const data: BeneficioSugestao[] = r.data;
                 setSugestoes(data);
                 const nomesSugestoes = data.map((b) => b.nome);
                 const extras = valoresIniciais.beneficios.filter((b) => !nomesSugestoes.includes(b));

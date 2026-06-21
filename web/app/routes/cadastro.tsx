@@ -2,9 +2,9 @@ import { useState } from "react";
 import { MdVisibility, MdVisibilityOff } from "react-icons/md";
 import { Link, useNavigate } from "react-router";
 import SelectCurso from "~/components/SelectCurso";
+import API from "../api/api";
 import Campo from "../components/Campo";
 import Card from "../components/Card";
-import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 
 export default function Cadastro() {
@@ -33,7 +33,6 @@ export default function Cadastro() {
         setErros({});
         setErroGeral("");
 
-        // Aceite dos termos é regra de interface, verificada no front
         if (!aceito) {
             setErros({ aceito: "Você deve aceitar os termos e condições" });
             return;
@@ -41,42 +40,32 @@ export default function Cadastro() {
 
         const dados =
             aba === "aluno"
-                ? { nome, email, senha, telefone, nascimento, curso, tipo: "aluno" }
-                : { nome, email, senha, telefone, cnpj, tipo: "empresa" };
+                ? { nome, email, senha, telefone, nascimento, curso, tipo: "aluno" as const }
+                : { nome, email, senha, telefone, cnpj, tipo: "empresa" as const };
 
         try {
-            const resposta = await api("/cadastro", {
-                method: "POST",
-                body: JSON.stringify(dados),
-            });
+            const rCadastro = await API.cadastro.criar(dados);
 
-            const retorno = await resposta.json();
-
-            if (!resposta.ok) {
-                if (retorno.erros) {
-                    setErros(retorno.erros);
+            if (!rCadastro.success) {
+                if (rCadastro.data?.erros) {
+                    setErros(rCadastro.data.erros);
                 } else {
-                    setErroGeral(retorno.mensagem ?? "Não foi possível criar a conta.");
+                    setErroGeral(rCadastro.data?.mensagem ?? "Não foi possível criar a conta.");
                 }
                 return;
             }
 
-            const respostaLogin = await api("/login", {
-                method: "POST",
-                body: JSON.stringify({ email, senha }),
-            });
+            const rLogin = await API.auth.login(email, senha);
 
-            if (!respostaLogin.ok) {
-                // Cadastro ok mas login falhou: redireciona pro login manual
+            if (!rLogin.success) {
                 navigate("/login");
                 return;
             }
 
             await recarregar();
 
-            const respAuth = await api("/auth");
-            const dadosAuth = await respAuth.json();
-            const tipo = dadosAuth?.usuario?.tipo;
+            const rAuth = await API.auth.check();
+            const tipo = rAuth.data?.usuario?.tipo;
 
             navigate(tipo === "empresa" ? "/empresa" : "/aluno");
         } catch {
@@ -228,7 +217,7 @@ export default function Cadastro() {
                 Já possui uma conta?{" "}
                 <Link to="/login" className="font-medium text-primary">Faça Login</Link>
             </p>
-            
+
         </Card>
     );
 }

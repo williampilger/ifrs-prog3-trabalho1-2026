@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { MdAddCircleOutline } from "react-icons/md";
 import { Link } from "react-router";
+import API from "../api/api";
 import CardResumo from "../components/CardResumo";
 import CardVaga from "../components/CardVaga";
-import { api } from "../lib/api";
 
 type Vaga = {
     id: number;
@@ -23,10 +23,8 @@ function formatarRemuneracao(salario: number | null): string {
 export default function Empresa() {
     const [vagas, setVagas] = useState<Vaga[]>([]);
 
-
     useEffect(() => {
-        api("/vagas")
-            .then((r) => r.json()).then((dados) => setVagas(dados.vagas ?? []));
+        API.vagas.list().then((r) => setVagas(r.data?.vagas ?? []));
     }, []);
 
     const vagasAtivas = vagas.filter((v) => !v.preenchida).length;

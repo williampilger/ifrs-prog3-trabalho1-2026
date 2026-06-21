@@ -1,13 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { api } from "./api";
-
-export type Usuario = {
-    id: number;
-    nome: string;
-    email: string;
-    telefone: string | null;
-    tipo: "aluno" | "empresa";
-};
+import API, { type Usuario } from "../api/api";
 
 type AuthContextType = {
     usuario: Usuario | null;
@@ -24,10 +16,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     async function recarregar() {
         try {
-            const resposta = await api("/auth");
-            if (resposta.ok) {
-                const dados = await resposta.json();
-                setUsuario(dados.usuario);
+            const r = await API.auth.check();
+            if (r.success && r.data?.usuario) {
+                setUsuario(r.data.usuario);
             } else {
                 setUsuario(null);
             }
@@ -40,15 +31,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     async function logout() {
         try {
-            await api("/logout");
+            await API.auth.logout();
         } catch {
             // ignora erro de rede no logout
         }
         setUsuario(null);
     }
 
-    // Roda só no cliente (no SSR o useEffect não executa), buscando o usuário
-    // a partir do cookie httpOnly que o navegador envia automaticamente.
     useEffect(() => {
         recarregar();
     }, []);
@@ -67,3 +56,5 @@ export function useAuth() {
     }
     return contexto;
 }
+
+export type { Usuario };

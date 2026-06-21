@@ -1,17 +1,16 @@
 import { useState } from "react";
 import { MdSchool, MdVisibility, MdVisibilityOff } from "react-icons/md";
 import { Link, redirect, useNavigate } from "react-router";
+import API from "../api/api";
 import Campo from "../components/Campo";
 import Card from "../components/Card";
-import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 
 export async function loader({ request }: { request: Request }) {
     const cookie = request.headers.get("Cookie") ?? "";
-    const resposta = await api("/auth", { headers: { Cookie: cookie } });
-    if (resposta.ok) {
-        const dados = await resposta.json();
-        const tipo = dados?.usuario?.tipo;
+    const r = await API.auth.check(cookie);
+    if (r.success) {
+        const tipo = r.data?.usuario?.tipo;
         throw redirect(tipo === "empresa" ? "/empresa" : "/aluno");
     }
     return null;
@@ -31,29 +30,21 @@ export default function Login() {
         setErroGeral("");
 
         try {
-            const resposta = await api("/login", {
-                method: "POST",
-                body: JSON.stringify({ email, senha }),
-            });
+            const r = await API.auth.login(email, senha);
 
-            const dados = await resposta.json();
-
-            if (!resposta.ok) {
-                if (dados.erros) {
-                    setErros(dados.erros);
+            if (!r.success) {
+                if (r.data?.erros) {
+                    setErros(r.data.erros);
                 } else {
-                    setErroGeral(dados.mensagem ?? "Não foi possível entrar.");
+                    setErroGeral(r.data?.mensagem ?? "Não foi possível entrar.");
                 }
                 return;
             }
 
-            // Login OK: o cookie já foi setado pelo backend.
-            // Recarrega o contexto de auth para saber quem é e redireciona.
             await recarregar();
 
-            const respAuth = await api("/auth");
-            const dadosAuth = await respAuth.json();
-            const tipo = dadosAuth?.usuario?.tipo;
+            const rAuth = await API.auth.check();
+            const tipo = rAuth.data?.usuario?.tipo;
 
             navigate(tipo === "empresa" ? "/empresa" : "/aluno");
         } catch {

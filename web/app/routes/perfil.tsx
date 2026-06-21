@@ -1,29 +1,19 @@
 import { useState } from "react";
 import { MdArrowBack, MdVisibility, MdVisibilityOff } from "react-icons/md";
 import { redirect, useLoaderData, useNavigate } from "react-router";
+import type { Usuario } from "~/api/types";
 import SelectCurso from "~/components/SelectCurso";
+import API from "../api/api";
 import Campo from "../components/Campo";
 import Card from "../components/Card";
-import { api } from "../lib/api";
-
-type Usuario = {
-    tipo: "aluno" | "empresa";
-    nome: string;
-    email: string;
-    telefone: string;
-    nascimento?: string;
-    curso?: string;
-    cnpj?: string;
-};
 
 export async function loader({ request }: { request: Request }): Promise<Usuario> {
     const cookie = request.headers.get("Cookie") ?? "";
-    const resposta = await api("/perfil", { headers: { Cookie: cookie } });
-    if (resposta.status === 401) {
+    const r = await API.perfil.get(cookie);
+    if (r.reqStat === 401) {
         throw redirect("/login");
     }
-    const dados = await resposta.json();
-    return dados.usuario as Usuario;
+    return r.data.usuario as Usuario;
 }
 
 export default function Perfil() {
@@ -34,7 +24,7 @@ export default function Perfil() {
     const [nome, setNome] = useState(usuario.nome);
     const [email, setEmail] = useState(usuario.email);
     const [senha, setSenha] = useState("");
-    const [telefone, setTelefone] = useState(usuario.telefone);
+    const [telefone, setTelefone] = useState(usuario.telefone ?? "");
     const [nascimento, setNascimento] = useState(usuario.nascimento ?? "");
     const [curso, setCurso] = useState(usuario.curso ?? "");
     const [cnpj, setCnpj] = useState(usuario.cnpj ?? "");
@@ -61,27 +51,19 @@ export default function Perfil() {
             : { nome, email, senha, telefone, cnpj };
 
         try {
-            const resposta = await fetch("http://localhost:3000/perfil", {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify(dados),
-            });
+            const r = await API.perfil.update(dados);
 
-            const retorno = await resposta.json();
-
-            if (!resposta.ok) {
-                if (retorno.erros) {
-                    setErros(retorno.erros);
+            if (!r.success) {
+                if (r.data?.erros) {
+                    setErros(r.data.erros);
                 } else {
-                    setErroGeral(retorno.mensagem ?? "Não foi possível salvar as alterações.");
+                    setErroGeral(r.data?.mensagem ?? "Não foi possível salvar as alterações.");
                 }
                 return;
             }
 
             setSalvo(true);
             setSenha("");
-            console.log("Perfil atualizado:", retorno);
         } catch {
             setErroGeral("Erro de conexão com o servidor.");
         }
