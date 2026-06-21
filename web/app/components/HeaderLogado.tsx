@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { MdLogout, MdPerson, MdKeyboardArrowDown } from "react-icons/md";
 import { useAuth } from "../lib/auth";
@@ -10,10 +10,23 @@ type HeaderLogadoProps = {
 
 export default function HeaderLogado({ nome, iniciais }: HeaderLogadoProps) {
     const [aberto, setAberto] = useState(false);
+    const ref = useRef<HTMLDivElement>(null);
     const { logout } = useAuth();
     const navigate = useNavigate();
 
+    useEffect(() => {
+        if (!aberto) return;
+        function handleClickFora(e: MouseEvent) {
+            if (ref.current && !ref.current.contains(e.target as Node)) {
+                setAberto(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickFora);
+        return () => document.removeEventListener("mousedown", handleClickFora);
+    }, [aberto]);
+
     async function handleLogout() {
+        setAberto(false);
         await logout();
         navigate("/login");
     }
@@ -33,7 +46,7 @@ export default function HeaderLogado({ nome, iniciais }: HeaderLogadoProps) {
                 />
                 Sistema de Estágios
             </Link>
-            <div className="relative">
+            <div className="relative" ref={ref}>
                 <button
                     onClick={() => setAberto((v) => !v)}
                     className="flex items-center gap-2"
@@ -48,6 +61,7 @@ export default function HeaderLogado({ nome, iniciais }: HeaderLogadoProps) {
                     <div className="absolute right-0 mt-2 w-48 rounded-lg border border-border bg-white py-1 shadow-md">
                         <Link
                             to="/perfil"
+                            onClick={() => setAberto(false)}
                             className="flex items-center gap-2 px-4 py-2 text-sm text-text-primary hover:bg-background-alt"
                         >
                             <MdPerson size={18} />

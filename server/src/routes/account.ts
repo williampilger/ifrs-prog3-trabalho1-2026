@@ -62,10 +62,7 @@ export async function AccountsRoutes(app: FastifyInstance) {
 
     app.get('/perfil', async (request: FastifyRequest, reply) => {
 
-        if (!request.user) {
-            reply.code(401).send({ mensagem: "Não autenticado." });
-            return;
-        }
+        if (!request.user) return reply.code(401).send({ mensagem: "Não autenticado." });
 
         const usuario = await prisma.usuario.findFirst({
             where: { id: request.user.id, excluidoEm: null },
@@ -91,10 +88,8 @@ export async function AccountsRoutes(app: FastifyInstance) {
 
     app.put('/perfil', async (request: FastifyRequest, reply) => {
 
-        if (!request.user) {
-            reply.code(401).send({ mensagem: "Não autenticado." });
-            return;
-        }
+        if (!request.user) return reply.code(401).send({ mensagem: "Não autenticado." });
+
 
         const tipo = request.user.tipo;
 
