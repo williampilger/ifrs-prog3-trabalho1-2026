@@ -30,10 +30,13 @@ model Usuario {
   nome       String
   email      String      @unique
   pswd       String
-  telefone   String?
-  criadoEm   DateTime    @default(now())
-  excluidoEm DateTime?
-  tipo       TipoUsuario
+  telefone    String?
+  nascimento  String?
+  curso       String?
+  cnpj        String?
+  criadoEm    DateTime    @default(now())
+  excluidoEm  DateTime?
+  tipo        TipoUsuario
 
   vagas Vaga[]
   areas UsuarioArea[]

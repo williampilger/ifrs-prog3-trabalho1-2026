@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Link } from "react-router";
 import { MdVisibility, MdVisibilityOff } from "react-icons/md";
-import Card from "../components/Card";
+import { Link } from "react-router";
+import SelectCurso from "~/components/SelectCurso";
 import Campo from "../components/Campo";
+import Card from "../components/Card";
 
 export default function Cadastro() {
     const [aba, setAba] = useState<"aluno" | "empresa">("aluno");
@@ -119,6 +120,7 @@ export default function Cadastro() {
                 />
 
                 <div className="grid grid-cols-2 gap-4">
+
                     <div className="flex flex-col gap-1">
                         <label className="text-sm font-medium text-text-primary">Senha</label>
                         <div className="relative">
@@ -139,6 +141,7 @@ export default function Cadastro() {
                         </div>
                         {erros.senha && <p className="text-xs text-red-600">{erros.senha}</p>}
                     </div>
+
                     {aba === "aluno" ? (
                         <Campo
                             label="Data de Nascimento"
@@ -169,16 +172,7 @@ export default function Cadastro() {
                     {aba === "aluno" && (
                         <div className="flex flex-col gap-1">
                             <label className="text-sm font-medium text-text-primary">Curso</label>
-                            <select
-                                value={curso}
-                                onChange={(e) => setCurso(e.target.value)}
-                                className="rounded-md border border-border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                            >
-                                <option value="">Selecione seu curso</option>
-                                <option value="info">Informática</option>
-                                <option value="quimica">Química</option>
-                                <option value="admin">Administração</option>
-                            </select>
+                            <SelectCurso curso={curso} onChange={ n => setCurso(n)}/>
                             {erros.curso && <p className="text-xs text-red-600">{erros.curso}</p>}
                         </div>
                     )}
@@ -216,6 +210,7 @@ export default function Cadastro() {
                 Já possui uma conta?{" "}
                 <Link to="/login" className="font-medium text-primary">Faça Login</Link>
             </p>
+            
         </Card>
     );
 }

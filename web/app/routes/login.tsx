@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
 import { MdSchool, MdVisibility, MdVisibilityOff } from "react-icons/md";
-import Card from "../components/Card";
+import { Link, useNavigate } from "react-router";
 import Campo from "../components/Campo";
+import Card from "../components/Card";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 
@@ -116,6 +116,10 @@ export default function Login() {
                         >
                             Entrar
                         </button>
+                        <p className="mt-5 text-center text-sm text-text-muted">
+                            Não possui uma conta?{" "}
+                            <Link to="/cadastro" className="font-medium text-primary">Crie sua conta</Link>
+                        </p>
                     </form>
                     <div className="my-5 flex items-center gap-3">
                         <div className="h-px flex-1 bg-border" />

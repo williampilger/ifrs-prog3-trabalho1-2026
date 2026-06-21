@@ -9,8 +9,9 @@ import ENV from './lib/environmentConstants.js';
 import { netTestReport } from './lib/netTools.js';
 import { prisma } from './lib/prisma.js';
 import { buildRandomString, tryCatchErrorStringify } from './lib/tools.js';
-import { authRoutes } from './routes/auth.js';
+import { AccountsRoutes } from './routes/account.js';
 import { areasRoutes } from './routes/areas.js';
+import { authRoutes } from './routes/auth.js';
 import { beneficiosRoutes } from './routes/beneficios.js';
 
 const app = fastify({
@@ -129,7 +130,9 @@ app.setErrorHandler(async (error: FastifyError, request: FastifyRequest, reply) 
         }
     }
 });
+
 app.register(authRoutes);
+app.register(AccountsRoutes);
 app.register(areasRoutes);
 app.register(beneficiosRoutes);
 
