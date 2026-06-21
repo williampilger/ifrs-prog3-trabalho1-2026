@@ -10,7 +10,7 @@ const vagaExistente: DadosVaga = {
     modalidade: "presencial",
     cargaHoraria: "30h",
     salario: "1200",
-    beneficios: ["vt", "vr"],
+    beneficios: ["Vale Transporte", "Vale Refeição/Alimentação"],
     descricaoAtividades: "Desenvolvimento de interfaces modernas com React e TypeScript, sempre acompanhado pela equipe.",
     descricaoHabilidades: "Conhecimento em HTML, CSS e JavaScript. Vontade de aprender e trabalhar em equipe.",
 };

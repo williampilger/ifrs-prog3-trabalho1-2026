@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { MdArrowBack, MdSend } from "react-icons/md";
+import { useEffect, useState } from "react";
+import { MdAdd, MdArrowBack, MdClose, MdSend } from "react-icons/md";
 import { Link } from "react-router";
+import { api } from "../lib/api";
 import Campo from "./Campo";
 import Card from "./Card";
 import SelectCurso from "./SelectCurso";
@@ -29,14 +30,6 @@ const opcoesCargaHoraria = [
     { valor: "40h", label: "40 horas (8h/dia)" },
 ];
 
-const opcoesBeneficios = [
-    { valor: "vt", label: "Vale Transporte" },
-    { valor: "vr", label: "Vale Refeição/Alimentação" },
-    { valor: "seguro", label: "Seguro de Vida" },
-    { valor: "auxilio", label: "Auxílio Remoto" },
-    { valor: "saude", label: "Plano de Saúde" },
-];
-
 const valoresVazios: DadosVaga = {
     vaga: "",
     curso: "",
@@ -58,6 +51,8 @@ type FormVagaProps = {
     onSubmit: (dados: DadosVaga) => void;
 };
 
+type BeneficioSugestao = { id: number; nome: string };
+
 export default function FormVaga({
     titulo,
     descricao,
@@ -72,14 +67,53 @@ export default function FormVaga({
     const [modalidade, setModalidade] = useState(valoresIniciais.modalidade);
     const [cargaHoraria, setCargaHoraria] = useState(valoresIniciais.cargaHoraria);
     const [salario, setSalario] = useState(valoresIniciais.salario);
-    const [beneficios, setBeneficios] = useState<string[]>(valoresIniciais.beneficios);
     const [descricaoAtividades, setDescricaoAtividades] = useState(valoresIniciais.descricaoAtividades);
     const [descricaoHabilidades, setDescricaoHabilidades] = useState(valoresIniciais.descricaoHabilidades);
 
-    function toggle(valor: string) {
-        setBeneficios((atual) =>
-            atual.includes(valor) ? atual.filter((v) => v !== valor) : [...atual, valor]
+    const [sugestoes, setSugestoes] = useState<BeneficioSugestao[]>([]);
+    const [selecionados, setSelecionados] = useState<string[]>(valoresIniciais.beneficios);
+    const [customBeneficios, setCustomBeneficios] = useState<string[]>([]);
+    const [customInput, setCustomInput] = useState("");
+
+    useEffect(() => {
+        api("/beneficios")
+            .then((r) => r.json())
+            .then((data: BeneficioSugestao[]) => {
+                setSugestoes(data);
+                const nomesSugestoes = data.map((b) => b.nome);
+                const extras = valoresIniciais.beneficios.filter((b) => !nomesSugestoes.includes(b));
+                if (extras.length > 0) setCustomBeneficios(extras);
+            })
+            .catch(() => {
+                setCustomBeneficios(valoresIniciais.beneficios);
+                setSelecionados([]);
+            });
+    }, []);
+
+    function toggle(nome: string) {
+        setSelecionados((atual) =>
+            atual.includes(nome) ? atual.filter((v) => v !== nome) : [...atual, nome]
         );
+    }
+
+    function adicionarCustom() {
+        const nome = customInput.trim();
+        if (!nome) return;
+        const jaExiste =
+            sugestoes.some((s) => s.nome.toLowerCase() === nome.toLowerCase()) ||
+            customBeneficios.some((b) => b.toLowerCase() === nome.toLowerCase());
+        if (!jaExiste) {
+            setCustomBeneficios((prev) => [...prev, nome]);
+        }
+        if (!selecionados.some((s) => s.toLowerCase() === nome.toLowerCase())) {
+            setSelecionados((prev) => [...prev, nome]);
+        }
+        setCustomInput("");
+    }
+
+    function removerCustom(nome: string) {
+        setCustomBeneficios((prev) => prev.filter((b) => b !== nome));
+        setSelecionados((prev) => prev.filter((v) => v !== nome));
     }
 
     function handleSubmit() {
@@ -90,7 +124,7 @@ export default function FormVaga({
             modalidade,
             cargaHoraria,
             salario,
-            beneficios,
+            beneficios: selecionados,
             descricaoAtividades,
             descricaoHabilidades,
         });
@@ -127,7 +161,7 @@ export default function FormVaga({
                     <div className="grid grid-cols-2 gap-4">
                         <div className="flex flex-col gap-1">
                             <label className="text-sm font-medium text-text-primary">Curso</label>
-                            <SelectCurso curso={curso} onChange={ n => setCurso(n)}/>
+                            <SelectCurso curso={curso} onChange={(n) => setCurso(n)} />
                             {erros.curso && <p className="text-xs text-red-600">{erros.curso}</p>}
                         </div>
                         <Campo
@@ -186,19 +220,66 @@ export default function FormVaga({
 
                     <div className="flex flex-col gap-2">
                         <label className="text-sm font-medium text-text-primary">Benefícios</label>
-                        <div className="grid grid-cols-3 gap-3">
-                            {opcoesBeneficios.map((o) => (
-                                <label key={o.valor} className="flex items-center gap-2 text-sm text-text-primary cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        value={o.valor}
-                                        checked={beneficios.includes(o.valor)}
-                                        onChange={() => toggle(o.valor)}
-                                        className="accent-primary"
-                                    />
-                                    {o.label}
-                                </label>
-                            ))}
+
+                        {sugestoes.length > 0 && (
+                            <div className="grid grid-cols-3 gap-3">
+                                {sugestoes.map((b) => (
+                                    <label key={b.id} className="flex items-center gap-2 text-sm text-text-primary cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={selecionados.includes(b.nome)}
+                                            onChange={() => toggle(b.nome)}
+                                            className="accent-primary"
+                                        />
+                                        {b.nome}
+                                    </label>
+                                ))}
+                            </div>
+                        )}
+
+                        {customBeneficios.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mt-1">
+                                {customBeneficios.map((nome) => (
+                                    <span
+                                        key={nome}
+                                        className="flex items-center gap-1 rounded-full border border-border bg-background px-3 py-1 text-sm text-text-primary"
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={selecionados.includes(nome)}
+                                            onChange={() => toggle(nome)}
+                                            className="accent-primary"
+                                        />
+                                        {nome}
+                                        <button
+                                            type="button"
+                                            onClick={() => removerCustom(nome)}
+                                            className="ml-1 text-text-muted hover:text-red-500 transition-colors"
+                                            aria-label={`Remover ${nome}`}
+                                        >
+                                            <MdClose size={14} />
+                                        </button>
+                                    </span>
+                                ))}
+                            </div>
+                        )}
+
+                        <div className="flex gap-2 mt-1">
+                            <input
+                                type="text"
+                                value={customInput}
+                                onChange={(e) => setCustomInput(e.target.value)}
+                                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); adicionarCustom(); } }}
+                                placeholder="Adicionar benefício personalizado..."
+                                className="flex-1 rounded-md border border-border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                            />
+                            <button
+                                type="button"
+                                onClick={adicionarCustom}
+                                className="flex items-center gap-1 rounded-md border border-primary px-4 py-2 text-sm font-medium text-primary hover:bg-primary hover:text-white transition-colors"
+                            >
+                                <MdAdd size={16} /> Adicionar
+                            </button>
                         </div>
                     </div>
 
