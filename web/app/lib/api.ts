@@ -11,3 +11,4 @@ export async function api(caminho: string, opcoes: RequestInit = {}) {
         ...opcoes,
     });
 }
+

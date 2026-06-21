@@ -35,6 +35,19 @@ async function resolverBeneficios(nomes: string[]) {
 
 export async function vagasRoutes(app: FastifyInstance) {
 
+    app.get("/vagas", async (request: FastifyRequest, reply) => {
+        if (!request.user) return reply.code(401).send({ mensagem: "Não autenticado." });
+        if (request.user.tipo !== "empresa") return reply.code(403).send({ mensagem: "Apenas empresas podem listar suas vagas." });
+
+        const vagas = await prisma.vaga.findMany({
+            where: { empresaId: request.user.id, excluidoEm: null },
+            include: { area: true },
+            orderBy: { criadoEm: "desc" },
+        });
+
+        reply.send({ vagas });
+    });
+
     app.get("/vagas/:id", async (request: FastifyRequest, reply) => {
         const { id } = paramsId.parse(request.params);
 
