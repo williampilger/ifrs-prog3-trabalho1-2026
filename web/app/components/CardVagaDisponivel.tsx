@@ -3,6 +3,7 @@ import Card from "./Card";
 import { MdSchool, MdLocationOn } from "react-icons/md";
 
 type CardVagaDisponivelProps = {
+    id: number;
     titulo: string;
     empresa: string;
     curso: string;
@@ -11,6 +12,7 @@ type CardVagaDisponivelProps = {
 };
 
 export default function CardVagaDisponivel({
+    id,
     titulo,
     empresa,
     curso,
@@ -35,7 +37,7 @@ export default function CardVagaDisponivel({
             <div className="flex items-center justify-between">
                 <span className="font-bold text-primary">{remuneracao} /mês</span>
                 <Link
-                    to="/vagas/detalhes"
+                    to={`/vagas/${id}`}
                     className="rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-dark transition-colors"
                 >
                     Ver Detalhes

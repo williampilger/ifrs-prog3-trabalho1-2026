@@ -89,6 +89,9 @@ const api_exports = {
         list: async (): Promise<resultType<{ vagas: any[] }>> => {
             return basicFetch('GET', '/vagas', {});
         },
+        listDisponiveis: async (): Promise<resultType<{ vagas: any[] }>> => {
+            return basicFetch('GET', '/vagas/disponiveis', {});
+        },
         get: async (id: string | number): Promise<resultType<{ vaga: any }>> => {
             return basicFetch('GET', `/vagas/${id}`, {});
         },

@@ -36,3 +36,28 @@ export type DadosVagaAPI = {
     contatoTelefone?: string;
     contatoEmail?: string;
 };
+
+export type Beneficio = {
+    id: number;
+    nome: string;
+};
+
+export type Empresa = {
+    //todo FALTA FAZER
+}:
+
+export type Vaga = {
+    id: number;
+    titulo: string;
+    descricao: string;
+    area: { nome: string };// isso ainda é meio temporário
+    empresa: Empresa;
+    local: string | null;
+    modalidade: string;
+    turno: string;
+    salario: number | null;
+    beneficios: Beneficio[];
+    contatoNome: string | null;
+    contatoEmail: string | null;
+    contatoTelefone: string | null;
+};

@@ -1,11 +1,52 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import API from "../api/api";
 import Campo from "../components/Campo";
 import Card from "../components/Card";
 import CardVagaDisponivel from "../components/CardVagaDisponivel";
+import SelectCurso from "../components/SelectCurso";
+
+type Vaga = {
+    id: number;
+    titulo: string;
+    area: { nome: string };
+    local: string | null;
+    salario: number | null;
+    preenchida: boolean;
+    empresa?: { nome: string };
+    nomeEmpresa?: string;
+};
+
+function formatarRemuneracao(salario: number | null): string {
+    if (!salario) return "A combinar";
+    return salario.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
+function nomeEmpresa(vaga: Vaga): string {
+    return vaga.empresa?.nome ?? vaga.nomeEmpresa ?? "";
+}
 
 export default function Aluno() {
     const [pesquisa, setPesquisa] = useState("");
     const [curso, setCurso] = useState("");
+    const [cidade, setCidade] = useState("");
+    const [vagas, setVagas] = useState<Vaga[]>([]);
+
+    useEffect(() => {
+        API.vagas.listDisponiveis().then((r) => setVagas(r.data?.vagas ?? []));
+    }, []);
+
+    const vagasFiltradas = vagas
+        .filter((v) => !v.preenchida)
+        .filter((v) =>
+            pesquisa === "" ||
+            v.titulo.toLowerCase().includes(pesquisa.toLowerCase()) ||
+            nomeEmpresa(v).toLowerCase().includes(pesquisa.toLowerCase())
+        )
+        .filter((v) => curso === "" || v.area.nome === curso)
+        .filter((v) =>
+            cidade === "" ||
+            (v.local ?? "").toLowerCase().includes(cidade.toLowerCase())
+        );
 
     return (
         <div>
@@ -22,29 +63,16 @@ export default function Aluno() {
                         />
                         <div className="flex flex-col gap-1 mt-4">
                             <label className="text-sm font-medium text-text-primary">Curso</label>
-                            <select
-                                value={curso}
-                                onChange={(e) => setCurso(e.target.value)}
-                                className="rounded-md border border-border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                            >
-                                <option value="">Selecione seu curso</option>
-                                <option value="info">Informática</option>
-                                <option value="quimica">Química</option>
-                                <option value="admin">Administração</option>
-                            </select>
+                            <SelectCurso curso={curso} onChange={setCurso} />
                         </div>
                         <div className="flex flex-col gap-1 mt-4">
-                            <label className="text-sm font-medium text-text-primary">Cidade</label>
-                            <select
-                                value={curso}
-                                onChange={(e) => setCurso(e.target.value)}
-                                className="rounded-md border border-border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                            >
-                                <option value="">Selecione a cidade</option>
-                                <option value="bomPrincipio">Bom Princípio</option>
-                                <option value="feliz">Feliz</option>
-                                <option value="saoSebastiao">São Sebastião do Caí</option>
-                            </select>
+                            <Campo
+                                label="Cidade"
+                                type="text"
+                                placeholder="Ex: Feliz, RS"
+                                value={cidade}
+                                onChange={setCidade}
+                            />
                         </div>
                     </Card>
                 </div>
@@ -54,31 +82,24 @@ export default function Aluno() {
                             Oportunidades Disponíveis
                         </h2>
                         <span className="rounded-full px-2.5 py-0.5 text-xs font-bold tracking-wide bg-secondary text-text-primary">
-                            12 vagas encontradas
+                            {vagasFiltradas.length} {vagasFiltradas.length === 1 ? "vaga encontrada" : "vagas encontradas"}
                         </span>
                     </section>
                     <div className="grid grid-cols-2 gap-4 mt-4">
-                        <CardVagaDisponivel
-                            titulo="Estágio em Desenvolvimento Web"
-                            empresa="Tech Solutions"
-                            curso="Ciência da Computação"
-                            local="Porto Alegre, RS"
-                            remuneracao="R$ 1.500,00"
-                        />
-                        <CardVagaDisponivel
-                            titulo="Estágio em Desenvolvimento Web"
-                            empresa="Tech Solutions"
-                            curso="Ciência da Computação"
-                            local="Porto Alegre, RS"
-                            remuneracao="R$ 1.500,00"
-                        />
-                        <CardVagaDisponivel
-                            titulo="Estágio em Desenvolvimento Web"
-                            empresa="Tech Solutions"
-                            curso="Ciência da Computação"
-                            local="Porto Alegre, RS"
-                            remuneracao="R$ 1.500,00"
-                        />
+                        {vagasFiltradas.map((v) => (
+                            <CardVagaDisponivel
+                                key={v.id}
+                                id={v.id}
+                                titulo={v.titulo}
+                                empresa={nomeEmpresa(v)}
+                                curso={v.area.nome}
+                                local={v.local ?? "A definir"}
+                                remuneracao={formatarRemuneracao(v.salario)}
+                            />
+                        ))}
+                        {vagasFiltradas.length === 0 && (
+                            <p className="col-span-2 text-sm text-text-muted">Nenhuma vaga encontrada.</p>
+                        )}
                     </div>
                 </div>
             </section>

@@ -1,62 +1,88 @@
-import { useState } from "react";
-import { Link } from "react-router";
+import { useEffect, useState } from "react";
 import {
-    MdSchool,
-    MdLocationOn,
-    MdAttachMoney,
     MdAccessTime,
-    MdCheckCircle,
     MdArrowBack,
+    MdAttachMoney,
     MdBusiness,
     MdCheck,
+    MdCheckCircle,
     MdContentCopy,
+    MdLocationOn,
+    MdSchool,
 } from "react-icons/md";
+import { Link, useParams } from "react-router";
+import API from "../api/api";
 import Card from "../components/Card";
+import { useAuth } from "../lib/auth";
 
-// Mock da Vaga
-const vaga = {
-    titulo: "Estágio em Desenvolvimento Web",
-    empresa: "Tech Solutions",
-    curso: "Ciência da Computação",
-    local: "Porto Alegre, RS",
-    modalidade: "Presencial",
-    cargaHoraria: "30 horas (6h/dia)",
-    remuneracao: "R$ 1.500,00",
-    descricaoAtividades:
-        "Desenvolvimento e manutenção de interfaces web utilizando React e TypeScript, integração com APIs REST e participação nas revisões de código da equipe.",
-    descricaoHabilidades:
-        "Conhecimento em HTML, CSS e JavaScript. Noções de Git e familiaridade com algum framework front-end são diferenciais.",
-    beneficios: ["Vale Transporte", "Vale Refeição/Alimentação", "Auxílio Remoto"],
-    contatoNome: "Maria Souza",
-    contatoEmail: "rh@techsolutions.com.br",
-    contatoTelefone: "(54) 99999-9999",
+const turnoLabels: Record<string, string> = {
+    integral: "Integral (6h/dia)",
+    manha: "Manhã (4h/dia)",
+    tarde: "Tarde (4h/dia)",
+    noite: "Noite (4h/dia)",
 };
 
-// Mock do Aluno
-const aluno = {
-    nome: "João Silva",
-    curso: "Análise e Desenvolvimento de Sistemas",
+const modalidadeLabels: Record<string, string> = {
+    presencial: "Presencial",
+    remoto: "Remoto",
+    hibrido: "Híbrido",
 };
+
+function formatarRemuneracao(salario: number | null): string {
+    if (!salario) return "A combinar";
+    return salario.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
 
 export default function VagasDetalhes() {
+    const { id } = useParams<{ id: string }>();
+    const { usuario } = useAuth();
+    const [vaga, setVaga] = useState<Vaga | null>(null);
+    const [carregando, setCarregando] = useState(true);
+    const [erro, setErro] = useState("");
     const [mostrarContato, setMostrarContato] = useState(false);
     const [copiado, setCopiado] = useState(false);
 
-    const mensagem = `Olá, tudo bem?
+    useEffect(() => {
+        API.vagas.get(id!)
+            .then((r) => {
+                if (r.success && r.data?.vaga) setVaga(r.data.vaga);
+                else setErro("Vaga não encontrada.");
+            })
+            .catch(() => setErro("Erro ao carregar a vaga."))
+            .finally(() => setCarregando(false));
+    }, [id]);
 
-Me chamo ${aluno.nome} e estou cursando ${aluno.curso}
+    const partes = vaga?.descricao.split("\n\n") ?? [];
+    const descricaoAtividades = partes[0] ?? "";
+    const descricaoHabilidades = partes.slice(1).join("\n\n");
 
-Estou interessado na vaga de estágio ${vaga.titulo} da sua ${vaga.empresa}.
+    const saudacao = vaga?.contatoNome ? `Olá, ${vaga.contatoNome}!` : "Olá!";
+
+    const mensagem = vaga && usuario ? `${saudacao}
+
+Meu nome é ${usuario.nome}, sou estudante de ${usuario.curso ?? "curso técnico"} no IFRS Campus Feliz e estou em busca de uma oportunidade de estágio.
+
+Encontrei a vaga "${vaga.titulo}" publicada pela ${vaga.empresa.nome} e gostaria de demonstrar meu interesse. A oportunidade está alinhada com minha área de formação e acredito que contribuiria para o meu desenvolvimento profissional.
+
+Poderia me informar sobre os próximos passos do processo seletivo?
 
 Atenciosamente,
-${aluno.nome}`;
+${usuario.nome}` : "";
 
     async function copiarMensagem() {
         await navigator.clipboard.writeText(mensagem);
         setCopiado(true);
         setTimeout(() => setCopiado(false), 2000);
     }
-    
+
+    if (carregando) {
+        return <p className="text-sm text-text-muted p-8">Carregando...</p>;
+    }
+
+    if (erro || !vaga) {
+        return <p className="text-sm text-red-600 p-8">{erro || "Vaga não encontrada."}</p>;
+    }
+
     return (
         <div className="max-w-4xl mx-auto">
             <Link
@@ -75,24 +101,24 @@ ${aluno.nome}`;
                         </h1>
                         <h3 className="mt-1 flex items-center gap-2 text-sm text-text-primary">
                             <MdBusiness className="text-primary" />
-                            {vaga.empresa}
+                            {vaga.empresa.nome}
                         </h3>
                         <div className="mt-6 grid grid-cols-2 gap-4 text-sm">
                             <span className="flex items-center gap-2 text-text-primary">
                                 <MdSchool className="text-primary" />
-                                {vaga.curso}
+                                {vaga.area.nome}
                             </span>
                             <span className="flex items-center gap-2 text-text-primary">
                                 <MdLocationOn className="text-primary" />
-                                {vaga.local} ({vaga.modalidade})
+                                {vaga.local ?? "A definir"} ({modalidadeLabels[vaga.modalidade] ?? vaga.modalidade})
                             </span>
                             <span className="flex items-center gap-2 text-text-primary">
                                 <MdAttachMoney className="text-primary" />
-                                {vaga.remuneracao}
+                                {formatarRemuneracao(vaga.salario)}
                             </span>
                             <span className="flex items-center gap-2 text-text-primary">
                                 <MdAccessTime className="text-primary" />
-                                {vaga.cargaHoraria}
+                                {turnoLabels[vaga.turno] ?? vaga.turno}
                             </span>
                         </div>
                     </Card>
@@ -101,89 +127,86 @@ ${aluno.nome}`;
                         <h3 className="text-xl font-semibold text-text-secondary">
                             Descrição de Atividades
                         </h3>
-                        <p className="mt-3 text-text-primary">
-                            {vaga.descricaoAtividades}
-                        </p>
-                    </Card>
-                    <Card className="bg-background border border-border">
-                        <h3 className="text-xl font-semibold text-text-secondary">
-                            Requisitos e Habilidades
-                        </h3>
-                        <p className="mt-3 text-text-primary">
-                            {vaga.descricaoHabilidades}
+                        <p className="mt-3 text-text-primary whitespace-pre-wrap">
+                            {descricaoAtividades}
                         </p>
                     </Card>
 
-                    <Card className="bg-background border border-border">
-                        <h3 className="text-xl font-semibold text-text-secondary">
-                            Benefícios
-                        </h3>
-                        <ul className="mt-3 flex flex-col gap-2">
-                            {vaga.beneficios.map((b) => (
-                                <li
-                                    key={b}
-                                    className="flex items-center gap-2 text-text-primary"
-                                >
-                                    <MdCheckCircle className="text-primary" />
-                                    {b}
-                                </li>
-                            ))}
-                        </ul>
-                    </Card>
+                    {descricaoHabilidades && (
+                        <Card className="bg-background border border-border">
+                            <h3 className="text-xl font-semibold text-text-secondary">
+                                Requisitos e Habilidades
+                            </h3>
+                            <p className="mt-3 text-text-primary whitespace-pre-wrap">
+                                {descricaoHabilidades}
+                            </p>
+                        </Card>
+                    )}
+
+                    {vaga.beneficios.length > 0 && (
+                        <Card className="bg-background border border-border">
+                            <h3 className="text-xl font-semibold text-text-secondary">
+                                Benefícios
+                            </h3>
+                            <ul className="mt-3 flex flex-col gap-2">
+                                {vaga.beneficios.map((vb) => (
+                                    <li
+                                        key={vb.beneficio.nome}
+                                        className="flex items-center gap-2 text-text-primary"
+                                    >
+                                        <MdCheckCircle className="text-primary" />
+                                        {vb.beneficio.nome}
+                                    </li>
+                                ))}
+                            </ul>
+                        </Card>
+                    )}
                 </div>
+
                 <div className="md:col-span-2 flex flex-col gap-6">
                     <Card className="bg-background border border-border">
                         <h3 className="text-xl font-semibold text-text-secondary">
                             Interessado na vaga?
                         </h3>
-                        {!mostrarContato ?(
-                            <button 
+                        {!mostrarContato ? (
+                            <button
                                 onClick={() => setMostrarContato(true)}
                                 className="mt-4 bg-primary text-white px-4 py-2 rounded flex items-center gap-2"
                             >
                                 Ver contato
                             </button>
                         ) : (
-                            <div className="mt-4">
-                                <p className="text-text-primary">
-                                    {vaga.contatoNome}
-                                </p>
-                                <p className="text-text-primary">
-                                    {vaga.contatoEmail}
-                                </p>
-                                <p className="text-text-primary">
-                                    {vaga.contatoTelefone}
-                                </p>
-                                <div className="flex flex-col gap-2">
-                                    <span className="text-xs font-medium uppercase tracking-wide text-text-muted">
-                                        Modelo de mensagem
-                                    </span>
-                                    <pre className="whitespace-pre-wrap rounded-md border border-border bg-background-alt p-3 text-xs text-text-primary font-sans">
-                                        {mensagem}
-                                    </pre>
-                                    <button
-                                        onClick={copiarMensagem}
-                                        className="flex items-center justify-center bg-primary text-white gap-2 rounded-lg border border-border py-2 text-sm font-medium text-text-primary"
-                                    >
-                                        {copiado ? (
-                                            <>
-                                                <MdCheck className="text-primary" />
-                                                Copiado!
-                                            </>
-                                        ) : (
-                                            <>
-                                                <MdContentCopy />
-                                                Copiar mensagem
-                                            </>
-                                        )}
-                                    </button>
-                                </div>
+                            <div className="mt-4 flex flex-col gap-2">
+                                {vaga.contatoNome && <p className="text-text-primary">{vaga.contatoNome}</p>}
+                                {vaga.contatoEmail && <p className="text-text-primary">{vaga.contatoEmail}</p>}
+                                {vaga.contatoTelefone && <p className="text-text-primary">{vaga.contatoTelefone}</p>}
+                                <span className="mt-2 text-xs font-medium uppercase tracking-wide text-text-muted">
+                                    Modelo de mensagem
+                                </span>
+                                <pre className="whitespace-pre-wrap rounded-md border border-border bg-background-alt p-3 text-xs text-text-primary font-sans">
+                                    {mensagem}
+                                </pre>
+                                <button
+                                    onClick={copiarMensagem}
+                                    className="flex items-center justify-center bg-primary text-white gap-2 rounded-lg border border-border py-2 text-sm font-medium"
+                                >
+                                    {copiado ? (
+                                        <>
+                                            <MdCheck />
+                                            Copiado!
+                                        </>
+                                    ) : (
+                                        <>
+                                            <MdContentCopy />
+                                            Copiar mensagem
+                                        </>
+                                    )}
+                                </button>
                             </div>
                         )}
                     </Card>
                 </div>
             </section>
-            
         </div>
     );
 }
