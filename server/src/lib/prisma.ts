@@ -1,5 +1,5 @@
 import { PrismaLibSql } from "@prisma/adapter-libsql";
-import { PrismaClient } from "../../generated/prisma/client.js";
+import { PrismaClient } from "../../generated/prisma/index.js";
 import ENV from "./environmentConstants.js";
 import { LogSystem } from "./LogSystem.js";
 
