@@ -7,15 +7,18 @@ import Card from "./Card";
 import SelectCurso from "./SelectCurso";
 
 export type DadosVaga = {
-    vaga: string;
+    titulo: string;
     curso: string;
-    localidade: string;
+    local: string;
     modalidade: string;
-    cargaHoraria: string;
+    turno: string;
     salario: string;
     beneficios: string[];
     descricaoAtividades: string;
     descricaoHabilidades: string;
+    contatoNome: string;
+    contatoTelefone: string;
+    contatoEmail: string;
 };
 
 const opcoesModalidade = [
@@ -24,22 +27,26 @@ const opcoesModalidade = [
     { valor: "remoto", label: "Remoto" },
 ];
 
-const opcoesCargaHoraria = [
-    { valor: "20h", label: "20 horas (4h/dia)" },
-    { valor: "30h", label: "30 horas (6h/dia)" },
-    { valor: "40h", label: "40 horas (8h/dia)" },
+const opcoesTurno = [
+    { valor: "integral", label: "Integral" },
+    { valor: "manha", label: "Manhã" },
+    { valor: "tarde", label: "Tarde" },
+    { valor: "noite", label: "Noite" },
 ];
 
 const valoresVazios: DadosVaga = {
-    vaga: "",
+    titulo: "",
     curso: "",
-    localidade: "",
+    local: "",
     modalidade: "",
-    cargaHoraria: "",
+    turno: "",
     salario: "",
     beneficios: [],
     descricaoAtividades: "",
     descricaoHabilidades: "",
+    contatoNome: "",
+    contatoTelefone: "",
+    contatoEmail: "",
 };
 
 type FormVagaProps = {
@@ -61,14 +68,17 @@ export default function FormVaga({
     erros = {},
     onSubmit,
 }: FormVagaProps) {
-    const [vaga, setVaga] = useState(valoresIniciais.vaga);
+    const [tituloVaga, setTituloVaga] = useState(valoresIniciais.titulo);
     const [curso, setCurso] = useState(valoresIniciais.curso);
-    const [localidade, setLocalidade] = useState(valoresIniciais.localidade);
+    const [local, setLocal] = useState(valoresIniciais.local);
     const [modalidade, setModalidade] = useState(valoresIniciais.modalidade);
-    const [cargaHoraria, setCargaHoraria] = useState(valoresIniciais.cargaHoraria);
+    const [turno, setTurno] = useState(valoresIniciais.turno);
     const [salario, setSalario] = useState(valoresIniciais.salario);
     const [descricaoAtividades, setDescricaoAtividades] = useState(valoresIniciais.descricaoAtividades);
     const [descricaoHabilidades, setDescricaoHabilidades] = useState(valoresIniciais.descricaoHabilidades);
+    const [contatoNome, setContatoNome] = useState(valoresIniciais.contatoNome);
+    const [contatoTelefone, setContatoTelefone] = useState(valoresIniciais.contatoTelefone);
+    const [contatoEmail, setContatoEmail] = useState(valoresIniciais.contatoEmail);
 
     const [sugestoes, setSugestoes] = useState<BeneficioSugestao[]>([]);
     const [selecionados, setSelecionados] = useState<string[]>(valoresIniciais.beneficios);
@@ -102,12 +112,9 @@ export default function FormVaga({
         const jaExiste =
             sugestoes.some((s) => s.nome.toLowerCase() === nome.toLowerCase()) ||
             customBeneficios.some((b) => b.toLowerCase() === nome.toLowerCase());
-        if (!jaExiste) {
-            setCustomBeneficios((prev) => [...prev, nome]);
-        }
-        if (!selecionados.some((s) => s.toLowerCase() === nome.toLowerCase())) {
+        if (!jaExiste) setCustomBeneficios((prev) => [...prev, nome]);
+        if (!selecionados.some((s) => s.toLowerCase() === nome.toLowerCase()))
             setSelecionados((prev) => [...prev, nome]);
-        }
         setCustomInput("");
     }
 
@@ -118,15 +125,18 @@ export default function FormVaga({
 
     function handleSubmit() {
         onSubmit({
-            vaga,
+            titulo: tituloVaga,
             curso,
-            localidade,
+            local,
             modalidade,
-            cargaHoraria,
+            turno,
             salario,
             beneficios: selecionados,
             descricaoAtividades,
             descricaoHabilidades,
+            contatoNome,
+            contatoTelefone,
+            contatoEmail,
         });
     }
 
@@ -153,23 +163,23 @@ export default function FormVaga({
                     <Campo
                         label="Título da Vaga"
                         placeholder="Ex: Desenvolvedor Frontend"
-                        value={vaga}
-                        onChange={setVaga}
-                        erro={erros.vaga}
+                        value={tituloVaga}
+                        onChange={setTituloVaga}
+                        erro={erros.titulo}
                     />
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="flex flex-col gap-1">
                             <label className="text-sm font-medium text-text-primary">Curso</label>
-                            <SelectCurso curso={curso} onChange={(n) => setCurso(n)} />
+                            <SelectCurso curso={curso} onChange={setCurso} />
                             {erros.curso && <p className="text-xs text-red-600">{erros.curso}</p>}
                         </div>
                         <Campo
                             label="Localidade"
                             placeholder="Ex: Cidade, RS"
-                            value={localidade}
-                            onChange={setLocalidade}
-                            erro={erros.localidade}
+                            value={local}
+                            onChange={setLocal}
+                            erro={erros.local}
                         />
                     </div>
 
@@ -195,18 +205,18 @@ export default function FormVaga({
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="flex flex-col gap-1">
-                            <label className="text-sm font-medium text-text-primary">Carga Horária Semanal</label>
+                            <label className="text-sm font-medium text-text-primary">Turno</label>
                             <select
-                                value={cargaHoraria}
-                                onChange={(e) => setCargaHoraria(e.target.value)}
+                                value={turno}
+                                onChange={(e) => setTurno(e.target.value)}
                                 className="rounded-md border border-border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                             >
-                                <option value="">Selecione sua carga horária</option>
-                                {opcoesCargaHoraria.map((o) => (
+                                <option value="">Selecione o turno</option>
+                                {opcoesTurno.map((o) => (
                                     <option key={o.valor} value={o.valor}>{o.label}</option>
                                 ))}
                             </select>
-                            {erros.cargaHoraria && <p className="text-xs text-red-600">{erros.cargaHoraria}</p>}
+                            {erros.turno && <p className="text-xs text-red-600">{erros.turno}</p>}
                         </div>
                         <Campo
                             label="Valor da Bolsa Auxílio"
@@ -306,6 +316,34 @@ export default function FormVaga({
                         />
                         {erros.descricaoHabilidades && <p className="text-xs text-red-600">{erros.descricaoHabilidades}</p>}
                     </div>
+
+                    <fieldset className="flex flex-col gap-3 rounded-md border border-border p-4">
+                        <legend className="px-1 text-sm font-medium text-text-primary">Contato para candidatura</legend>
+                        <div className="grid grid-cols-2 gap-4">
+                            <Campo
+                                label="Nome do responsável"
+                                placeholder="Ex: Maria Souza"
+                                value={contatoNome}
+                                onChange={setContatoNome}
+                                erro={erros.contatoNome}
+                            />
+                            <Campo
+                                label="Telefone"
+                                placeholder="Ex: (54) 99999-9999"
+                                value={contatoTelefone}
+                                onChange={setContatoTelefone}
+                                erro={erros.contatoTelefone}
+                            />
+                        </div>
+                        <Campo
+                            label="E-mail"
+                            type="email"
+                            placeholder="Ex: rh@empresa.com.br"
+                            value={contatoEmail}
+                            onChange={setContatoEmail}
+                            erro={erros.contatoEmail}
+                        />
+                    </fieldset>
 
                     <button
                         type="submit"

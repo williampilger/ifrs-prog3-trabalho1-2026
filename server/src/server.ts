@@ -13,6 +13,7 @@ import { AccountsRoutes } from './routes/account.js';
 import { areasRoutes } from './routes/areas.js';
 import { authRoutes } from './routes/auth.js';
 import { beneficiosRoutes } from './routes/beneficios.js';
+import { vagasRoutes } from './routes/vagas.js';
 
 const app = fastify({
     logger: false
@@ -135,6 +136,7 @@ app.register(authRoutes);
 app.register(AccountsRoutes);
 app.register(areasRoutes);
 app.register(beneficiosRoutes);
+app.register(vagasRoutes);
 
 app.get('/', () => {
     return {

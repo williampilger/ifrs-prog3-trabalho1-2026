@@ -12,6 +12,7 @@ import {
 import { Link } from "react-router";
 
 type CardVagaProps = {
+    id: number;
     titulo: string;
     descricao: string;
     curso: string;
@@ -21,6 +22,7 @@ type CardVagaProps = {
 };
 
 export default function CardVaga({
+    id,
     titulo,
     descricao,
     curso,
@@ -70,7 +72,7 @@ export default function CardVaga({
                     </div>
                 </div>
                 <div className="flex flex-col items-center justify-between gap-4 self-stretch">
-                    <Link to="/empresa/vagas/editar">
+                    <Link to={`/empresa/vagas/editar/${id}`}>
                         <button className="text-text-primary hover:text-primary" title="Editar">
                             <MdEdit size={24} />
                         </button>

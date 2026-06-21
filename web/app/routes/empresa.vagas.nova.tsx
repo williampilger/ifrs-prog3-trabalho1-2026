@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import FormVaga, { type DadosVaga } from "../components/FormVaga";
+import { api } from "../lib/api";
 
 export default function NovaVaga() {
     const [erros, setErros] = useState<Record<string, string>>({});
@@ -9,23 +10,35 @@ export default function NovaVaga() {
     async function handleSubmit(dados: DadosVaga) {
         setErros({});
         try {
-            const resposta = await fetch("http://localhost:3000/vagas", {
+            const resposta = await api("/vagas", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify(dados),
+                body: JSON.stringify({
+                    titulo: dados.titulo,
+                    curso: dados.curso,
+                    turno: dados.turno,
+                    modalidade: dados.modalidade,
+                    salario: dados.salario ? Number(dados.salario) : null,
+                    local: dados.local || undefined,
+                    descricaoAtividades: dados.descricaoAtividades,
+                    descricaoHabilidades: dados.descricaoHabilidades || undefined,
+                    beneficios: dados.beneficios,
+                    contatoNome: dados.contatoNome || undefined,
+                    contatoTelefone: dados.contatoTelefone || undefined,
+                    contatoEmail: dados.contatoEmail || undefined,
+                }),
             });
 
             const retorno = await resposta.json();
 
             if (!resposta.ok) {
                 if (retorno.erros) setErros(retorno.erros);
+                else setErros({ titulo: retorno.mensagem ?? "Erro ao criar vaga." });
                 return;
             }
 
             navigate("/empresa");
         } catch {
-            setErros({ vaga: "Erro de conexão com o servidor." });
+            setErros({ titulo: "Erro de conexão com o servidor." });
         }
     }
 

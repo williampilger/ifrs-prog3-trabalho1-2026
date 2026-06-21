@@ -24,6 +24,7 @@ export default function Empresa() {
             <section className="mt-8 grid grid-cols-3 gap-6">
                 <div className="col-span-2">
                     <CardVaga
+                        id={1}
                         titulo="Desenvolvedor Front-end Estagiário"
                         descricao="Desenvolvimento de interfaces modernas..."
                         curso="Ciência da Computação"
