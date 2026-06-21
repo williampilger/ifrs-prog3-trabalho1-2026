@@ -1,11 +1,15 @@
 import { useState } from "react";
 import { MdVisibility, MdVisibilityOff } from "react-icons/md";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import SelectCurso from "~/components/SelectCurso";
 import Campo from "../components/Campo";
 import Card from "../components/Card";
+import { api } from "../lib/api";
+import { useAuth } from "../lib/auth";
 
 export default function Cadastro() {
+    const navigate = useNavigate();
+    const { recarregar } = useAuth();
     const [aba, setAba] = useState<"aluno" | "empresa">("aluno");
     const [nome, setNome] = useState("");
     const [email, setEmail] = useState("");
@@ -41,10 +45,8 @@ export default function Cadastro() {
                 : { nome, email, senha, telefone, cnpj, tipo: "empresa" };
 
         try {
-            const resposta = await fetch("http://localhost:3000/cadastro", {
+            const resposta = await api("/cadastro", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
                 body: JSON.stringify(dados),
             });
 
@@ -59,8 +61,24 @@ export default function Cadastro() {
                 return;
             }
 
-            console.log("Cadastro OK:", retorno);
-            // depois: redirecionar para /login ou já logar
+            const respostaLogin = await api("/login", {
+                method: "POST",
+                body: JSON.stringify({ email, senha }),
+            });
+
+            if (!respostaLogin.ok) {
+                // Cadastro ok mas login falhou: redireciona pro login manual
+                navigate("/login");
+                return;
+            }
+
+            await recarregar();
+
+            const respAuth = await api("/auth");
+            const dadosAuth = await respAuth.json();
+            const tipo = dadosAuth?.usuario?.tipo;
+
+            navigate(tipo === "empresa" ? "/empresa" : "/aluno");
         } catch {
             setErroGeral("Erro de conexão com o servidor.");
         }

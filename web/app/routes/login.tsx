@@ -1,10 +1,21 @@
 import { useState } from "react";
 import { MdSchool, MdVisibility, MdVisibilityOff } from "react-icons/md";
-import { Link, useNavigate } from "react-router";
+import { Link, redirect, useNavigate } from "react-router";
 import Campo from "../components/Campo";
 import Card from "../components/Card";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
+
+export async function loader({ request }: { request: Request }) {
+    const cookie = request.headers.get("Cookie") ?? "";
+    const resposta = await api("/auth", { headers: { Cookie: cookie } });
+    if (resposta.ok) {
+        const dados = await resposta.json();
+        const tipo = dados?.usuario?.tipo;
+        throw redirect(tipo === "empresa" ? "/empresa" : "/aluno");
+    }
+    return null;
+}
 
 export default function Login() {
     const [email, setEmail] = useState("");

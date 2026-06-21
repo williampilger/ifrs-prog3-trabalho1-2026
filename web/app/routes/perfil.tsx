@@ -16,8 +16,9 @@ type Usuario = {
     cnpj?: string;
 };
 
-export async function loader(): Promise<Usuario> {
-    const resposta = await api("/perfil");
+export async function loader({ request }: { request: Request }): Promise<Usuario> {
+    const cookie = request.headers.get("Cookie") ?? "";
+    const resposta = await api("/perfil", { headers: { Cookie: cookie } });
     if (resposta.status === 401) {
         throw redirect("/login");
     }
