@@ -69,7 +69,7 @@ export default function FormVaga({
 
     const [sugestoes, setSugestoes] = useState<Beneficio[]>([]);
     const [selecionados, setSelecionados] = useState<string[]>(
-        valoresIniciais.beneficios.map((b) => b.nome)
+        (valoresIniciais.beneficios ?? []).map((b) => b.nome)
     );
     const [customBeneficios, setCustomBeneficios] = useState<string[]>([]);
     const [customInput, setCustomInput] = useState("");
@@ -81,12 +81,12 @@ export default function FormVaga({
                 const data: Beneficio[] = r.data;
                 setSugestoes(data);
                 const nomesSugestoes = data.map((b) => b.nome);
-                const nomesBeneficios = valoresIniciais.beneficios.map((b) => b.nome);
+                const nomesBeneficios = (valoresIniciais.beneficios ?? []).map((b) => b.nome);
                 const extras = nomesBeneficios.filter((b) => !nomesSugestoes.includes(b));
                 if (extras.length > 0) setCustomBeneficios(extras);
             })
             .catch(() => {
-                setCustomBeneficios(valoresIniciais.beneficios.map((b) => b.nome));
+                setCustomBeneficios((valoresIniciais.beneficios ?? []).map((b) => b.nome));
                 setSelecionados([]);
             });
     }, []);

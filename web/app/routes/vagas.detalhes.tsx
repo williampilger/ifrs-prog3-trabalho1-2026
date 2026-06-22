@@ -53,17 +53,13 @@ export default function VagasDetalhes() {
             .finally(() => setCarregando(false));
     }, [id]);
 
-    const partes = vaga?.descricao.split("\n\n") ?? [];
-    const descricaoAtividades = partes[0] ?? "";
-    const descricaoHabilidades = partes.slice(1).join("\n\n");
-
     const saudacao = vaga?.contatoNome ? `Olá, ${vaga.contatoNome}!` : "Olá!";
 
     const mensagem = vaga && usuario ? `${saudacao}
 
 Meu nome é ${usuario.nome}, sou estudante de ${usuario.curso ?? "curso técnico"} no IFRS Campus Feliz e estou em busca de uma oportunidade de estágio.
 
-Encontrei a vaga "${vaga.titulo}" publicada pela ${vaga.empresa.nome} e gostaria de demonstrar meu interesse. A oportunidade está alinhada com minha área de formação e acredito que contribuiria para o meu desenvolvimento profissional.
+Encontrei a vaga "${vaga.titulo}" publicada pela ${vaga.empresa?.nome ?? "empresa"} e gostaria de demonstrar meu interesse. A oportunidade está alinhada com minha área de formação e acredito que contribuiria para o meu desenvolvimento profissional.
 
 Poderia me informar sobre os próximos passos do processo seletivo?
 
@@ -102,7 +98,7 @@ ${usuario.nome}` : "";
                         </h1>
                         <h3 className="mt-1 flex items-center gap-2 text-sm text-text-primary">
                             <MdBusiness className="text-primary" />
-                            {vaga.empresa.nome}
+                            {vaga.empresa?.nome}
                         </h3>
                         <div className="mt-6 grid grid-cols-2 gap-4 text-sm">
                             <span className="flex items-center gap-2 text-text-primary">
@@ -126,33 +122,22 @@ ${usuario.nome}` : "";
 
                     <Card className="bg-background border border-border">
                         <h3 className="text-xl font-semibold text-text-secondary">
-                            Descrição de Atividades
+                            Descrição da Vaga
                         </h3>
                         <p className="mt-3 text-text-primary whitespace-pre-wrap">
-                            {descricaoAtividades}
+                            {vaga.descricao}
                         </p>
                     </Card>
 
-                    {descricaoHabilidades && (
-                        <Card className="bg-background border border-border">
-                            <h3 className="text-xl font-semibold text-text-secondary">
-                                Requisitos e Habilidades
-                            </h3>
-                            <p className="mt-3 text-text-primary whitespace-pre-wrap">
-                                {descricaoHabilidades}
-                            </p>
-                        </Card>
-                    )}
-
-                    {vaga.beneficios.length > 0 && (
+                    {(vaga.beneficios?.length ?? 0) > 0 && (
                         <Card className="bg-background border border-border">
                             <h3 className="text-xl font-semibold text-text-secondary">
                                 Benefícios
                             </h3>
                             <ul className="mt-3 flex flex-col gap-2">
-                                {vaga.beneficios.map((vb) => (
+                                {vaga.beneficios!.map((vb) => (
                                     <li
-                                        key={vb.nome}
+                                        key={vb.id}
                                         className="flex items-center gap-2 text-text-primary"
                                     >
                                         <MdCheckCircle className="text-primary" />

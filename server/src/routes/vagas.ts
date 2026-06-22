@@ -7,11 +7,10 @@ const paramsId = z.object({ id: z.coerce.number().int().positive() });
 
 const bodyVaga = z.object({
     titulo: z.string().min(3, "Título deve ter ao menos 3 caracteres."),
-    curso: z.string().min(1, "Selecione um curso."),
+    areaId: z.number().int().positive("Selecione uma área."),
     turno: z.enum(["integral", "manha", "tarde", "noite"]),
     modalidade: z.enum(["presencial", "remoto", "hibrido"]),
-    descricaoAtividades: z.string().min(10, "Descrição de atividades deve ter ao menos 10 caracteres."),
-    descricaoHabilidades: z.string().optional().default(""),
+    descricao: z.string().min(10, "Descrição deve ter ao menos 10 caracteres."),
     salario: z.number().positive().nullable().optional(),
     local: z.string().optional(),
     contatoNome: z.string().optional(),
@@ -20,15 +19,10 @@ const bodyVaga = z.object({
     beneficios: z.array(z.string().min(1)).optional().default([]),
 });
 
-async function resolverBeneficios(nomes: string[]) {
+async function upsertBeneficios(nomes: string[]) {
     return Promise.all(
         nomes.map((nome) =>
-            prisma.beneficio.upsert({
-                where: { nome },
-                update: {},
-                create: { nome },
-                select: { id: true },
-            })
+            prisma.beneficio.upsert({ where: { nome }, update: {}, create: { nome } })
         )
     );
 }
@@ -71,7 +65,7 @@ export async function vagasRoutes(app: FastifyInstance) {
             include: {
                 area: true,
                 empresa: { select: { id: true, nome: true } },
-                beneficios: { include: { beneficio: true } },
+                beneficios: true,
             },
         });
 
@@ -87,20 +81,13 @@ export async function vagasRoutes(app: FastifyInstance) {
 
         const body = bodyVaga.parse(request.body);
 
-        const area = await prisma.area.upsert({
-            where: { nome: body.curso },
-            update: {},
-            create: { nome: body.curso },
-        });
-
-        const beneficiosIds = await resolverBeneficios(body.beneficios);
-        const descricao = [body.descricaoAtividades, body.descricaoHabilidades].filter(Boolean).join("\n\n");
+        const beneficios = await upsertBeneficios(body.beneficios);
 
         const vaga = await prisma.vaga.create({
             data: {
                 titulo: body.titulo,
-                descricao,
-                areaId: area.id,
+                descricao: body.descricao,
+                areaId: body.areaId,
                 empresaId: request.user.id,
                 turno: body.turno,
                 modalidade: body.modalidade,
@@ -109,13 +96,11 @@ export async function vagasRoutes(app: FastifyInstance) {
                 contatoNome: body.contatoNome ?? null,
                 contatoTelefone: body.contatoTelefone ?? null,
                 contatoEmail: body.contatoEmail || null,
-                beneficios: {
-                    create: beneficiosIds.map((b) => ({ beneficioId: b.id })),
-                },
+                beneficios: { set: beneficios },
             },
             include: {
                 area: true,
-                beneficios: { include: { beneficio: true } },
+                beneficios: true,
             },
         });
 
@@ -133,21 +118,14 @@ export async function vagasRoutes(app: FastifyInstance) {
         if (!vaga) return reply.code(404).send({ mensagem: "Vaga não encontrada." });
         if (vaga.empresaId !== request.user.id) return reply.code(403).send({ mensagem: "Sem permissão para editar esta vaga." });
 
-        const area = await prisma.area.upsert({
-            where: { nome: body.curso },
-            update: {},
-            create: { nome: body.curso },
-        });
-
-        const beneficiosIds = await resolverBeneficios(body.beneficios);
-        const descricao = [body.descricaoAtividades, body.descricaoHabilidades].filter(Boolean).join("\n\n");
+        const beneficios = await upsertBeneficios(body.beneficios);
 
         const vagaAtualizada = await prisma.vaga.update({
             where: { id },
             data: {
                 titulo: body.titulo,
-                descricao,
-                areaId: area.id,
+                descricao: body.descricao,
+                areaId: body.areaId,
                 turno: body.turno,
                 modalidade: body.modalidade,
                 salario: body.salario ?? null,
@@ -155,14 +133,11 @@ export async function vagasRoutes(app: FastifyInstance) {
                 contatoNome: body.contatoNome ?? null,
                 contatoTelefone: body.contatoTelefone ?? null,
                 contatoEmail: body.contatoEmail || null,
-                beneficios: {
-                    deleteMany: {},
-                    create: beneficiosIds.map((b) => ({ beneficioId: b.id })),
-                },
+                beneficios: { set: beneficios },
             },
             include: {
                 area: true,
-                beneficios: { include: { beneficio: true } },
+                beneficios: true,
             },
         });
 

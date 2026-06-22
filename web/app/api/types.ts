@@ -51,7 +51,7 @@ export type Vaga = {
     turno: Turno;
     salario: number | null;
     preenchida: boolean;
-    beneficios: Beneficio[];
+    beneficios?: Beneficio[];
     contatoNome: string | null;
     contatoEmail: string | null;
     contatoTelefone: string | null;

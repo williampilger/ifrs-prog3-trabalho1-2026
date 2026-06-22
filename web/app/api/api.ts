@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Usuario, Vaga } from './types';
+import type { Aluno, Empresa, Usuario, Vaga } from './types';
 
 const API_URL = "http://localhost:3000";
 
@@ -80,7 +80,7 @@ const api_exports = {
     },
 
     cadastro: {
-        criar: async (dados: Usuario): Promise<resultType<{ erros?: Record<string, string>; mensagem?: string }>> => {
+        criar: async (dados: Partial<Aluno | Empresa> & { senha: string }): Promise<resultType<{ erros?: Record<string, string>; mensagem?: string }>> => {
             return basicFetch('POST', '/cadastro', dados);
         },
     },
@@ -96,10 +96,12 @@ const api_exports = {
             return basicFetch('GET', `/vagas/${id}`, {});
         },
         create: async (dados: Vaga): Promise<resultType<{ erros?: Record<string, string>; mensagem?: string }>> => {
-            return basicFetch('POST', '/vagas', dados);
+            const body = { ...dados, beneficios: (dados.beneficios ?? []).map((b) => b.nome) };
+            return basicFetch('POST', '/vagas', body);
         },
         update: async (id: string | number, dados: Vaga): Promise<resultType<{ erros?: Record<string, string>; mensagem?: string }>> => {
-            return basicFetch('PUT', `/vagas/${id}`, dados);
+            const body = { ...dados, beneficios: (dados.beneficios ?? []).map((b) => b.nome) };
+            return basicFetch('PUT', `/vagas/${id}`, body);
         },
     },
 
