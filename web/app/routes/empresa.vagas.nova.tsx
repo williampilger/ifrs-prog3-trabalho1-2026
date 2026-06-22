@@ -1,29 +1,17 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import API from "../api/api";
-import FormVaga, { type DadosVaga } from "../components/FormVaga";
+import type { Vaga } from "../api/types";
+import FormVaga from "../components/FormVaga";
 
 export default function NovaVaga() {
     const [erros, setErros] = useState<Record<string, string>>({});
     const navigate = useNavigate();
 
-    async function handleSubmit(dados: DadosVaga) {
+    async function handleSubmit(dados: Vaga) {
         setErros({});
         try {
-            const r = await API.vagas.create({
-                titulo: dados.titulo,
-                curso: dados.curso,
-                turno: dados.turno,
-                modalidade: dados.modalidade,
-                salario: dados.salario ? Number(dados.salario) : null,
-                local: dados.local || undefined,
-                descricaoAtividades: dados.descricaoAtividades,
-                descricaoHabilidades: dados.descricaoHabilidades || undefined,
-                beneficios: dados.beneficios,
-                contatoNome: dados.contatoNome || undefined,
-                contatoTelefone: dados.contatoTelefone || undefined,
-                contatoEmail: dados.contatoEmail || undefined,
-            });
+            const r = await API.vagas.create(dados);
 
             if (!r.success) {
                 if (r.data?.erros) setErros(r.data.erros);

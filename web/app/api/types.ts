@@ -45,7 +45,7 @@ export type Vaga = {
     areaId: number;
     area: Area;
     empresaId: number;
-    empresa: Empresa;
+    empresa?: Empresa;
     local: string | null;
     modalidade: Modalidade;
     turno: Turno;

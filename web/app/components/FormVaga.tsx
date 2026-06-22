@@ -1,19 +1,18 @@
 import { useEffect, useState } from "react";
 import { MdAdd, MdArrowBack, MdClose, MdSend } from "react-icons/md";
 import { Link } from "react-router";
-import type { Vaga } from "~/api/types";
+import type { Beneficio, Modalidade, Turno, Vaga } from "~/api/types";
 import API from "../api/api";
 import Campo from "./Campo";
 import Card from "./Card";
-import SelectCurso from "./SelectCurso";
 
-const opcoesModalidade = [
+const opcoesModalidade: { valor: Modalidade; label: string }[] = [
     { valor: "presencial", label: "Presencial" },
     { valor: "hibrido", label: "Híbrido" },
     { valor: "remoto", label: "Remoto" },
 ];
 
-const opcoesTurno = [
+const opcoesTurno: { valor: Turno; label: string }[] = [
     { valor: "integral", label: "Integral" },
     { valor: "manha", label: "Manhã" },
     { valor: "tarde", label: "Tarde" },
@@ -21,30 +20,33 @@ const opcoesTurno = [
 ];
 
 const valoresVazios: Vaga = {
-    titulo: "",
-    curso: "",
-    local: "",
-    modalidade: "",
-    turno: "",
-    salario: "",
+    id: 0,
+    titulo: '',
+    descricao: '',
+    areaId: 0,
+    area: { id: 0, nome: '' },
+    empresaId: 0,
+    local: null,
+    modalidade: "presencial",
+    turno: "integral",
+    salario: null,
+    preenchida: false,
     beneficios: [],
-    descricaoAtividades: "",
-    descricaoHabilidades: "",
-    contatoNome: "",
-    contatoTelefone: "",
-    contatoEmail: "",
+    contatoNome: null,
+    contatoEmail: null,
+    contatoTelefone: null,
+    criadoEm: '',
+    excluidoEm: null,
 };
 
 type FormVagaProps = {
     titulo: string;
     descricao: string;
     textoBotao: string;
-    valoresIniciais?: DadosVaga;
+    valoresIniciais?: Vaga;
     erros?: Record<string, string>;
-    onSubmit: (dados: DadosVaga) => void;
+    onSubmit: (dados: Vaga) => void;
 };
-
-type BeneficioSugestao = { id: number; nome: string };
 
 export default function FormVaga({
     titulo,
@@ -55,19 +57,20 @@ export default function FormVaga({
     onSubmit,
 }: FormVagaProps) {
     const [tituloVaga, setTituloVaga] = useState(valoresIniciais.titulo);
-    const [curso, setCurso] = useState(valoresIniciais.curso);
-    const [local, setLocal] = useState(valoresIniciais.local);
-    const [modalidade, setModalidade] = useState(valoresIniciais.modalidade);
-    const [turno, setTurno] = useState(valoresIniciais.turno);
-    const [salario, setSalario] = useState(valoresIniciais.salario);
-    const [descricaoAtividades, setDescricaoAtividades] = useState(valoresIniciais.descricaoAtividades);
-    const [descricaoHabilidades, setDescricaoHabilidades] = useState(valoresIniciais.descricaoHabilidades);
-    const [contatoNome, setContatoNome] = useState(valoresIniciais.contatoNome);
-    const [contatoTelefone, setContatoTelefone] = useState(valoresIniciais.contatoTelefone);
-    const [contatoEmail, setContatoEmail] = useState(valoresIniciais.contatoEmail);
+    const [areaId, setAreaId] = useState(String(valoresIniciais.areaId));
+    const [local, setLocal] = useState(valoresIniciais.local ?? '');
+    const [modalidade, setModalidade] = useState<Modalidade>(valoresIniciais.modalidade);
+    const [turno, setTurno] = useState<Turno>(valoresIniciais.turno);
+    const [salario, setSalario] = useState(valoresIniciais.salario?.toString() ?? '');
+    const [descricaoVaga, setDescricaoVaga] = useState(valoresIniciais.descricao);
+    const [contatoNome, setContatoNome] = useState(valoresIniciais.contatoNome ?? '');
+    const [contatoTelefone, setContatoTelefone] = useState(valoresIniciais.contatoTelefone ?? '');
+    const [contatoEmail, setContatoEmail] = useState(valoresIniciais.contatoEmail ?? '');
 
-    const [sugestoes, setSugestoes] = useState<BeneficioSugestao[]>([]);
-    const [selecionados, setSelecionados] = useState<string[]>(valoresIniciais.beneficios);
+    const [sugestoes, setSugestoes] = useState<Beneficio[]>([]);
+    const [selecionados, setSelecionados] = useState<string[]>(
+        valoresIniciais.beneficios.map((b) => b.nome)
+    );
     const [customBeneficios, setCustomBeneficios] = useState<string[]>([]);
     const [customInput, setCustomInput] = useState("");
 
@@ -75,14 +78,15 @@ export default function FormVaga({
         API.beneficios.list()
             .then((r) => {
                 if (!r.success) throw new Error();
-                const data: BeneficioSugestao[] = r.data;
+                const data: Beneficio[] = r.data;
                 setSugestoes(data);
                 const nomesSugestoes = data.map((b) => b.nome);
-                const extras = valoresIniciais.beneficios.filter((b) => !nomesSugestoes.includes(b));
+                const nomesBeneficios = valoresIniciais.beneficios.map((b) => b.nome);
+                const extras = nomesBeneficios.filter((b) => !nomesSugestoes.includes(b));
                 if (extras.length > 0) setCustomBeneficios(extras);
             })
             .catch(() => {
-                setCustomBeneficios(valoresIniciais.beneficios);
+                setCustomBeneficios(valoresIniciais.beneficios.map((b) => b.nome));
                 setSelecionados([]);
             });
     }, []);
@@ -111,19 +115,23 @@ export default function FormVaga({
     }
 
     function handleSubmit() {
+        const beneficiosSubmit: Beneficio[] = selecionados.map((nome) => {
+            const sugestao = sugestoes.find((s) => s.nome === nome);
+            return sugestao ?? { id: 0, nome };
+        });
         onSubmit({
+            ...valoresIniciais,
             titulo: tituloVaga,
-            curso,
-            local,
+            areaId: Number(areaId),
+            local: local || null,
             modalidade,
             turno,
-            salario,
-            beneficios: selecionados,
-            descricaoAtividades,
-            descricaoHabilidades,
-            contatoNome,
-            contatoTelefone,
-            contatoEmail,
+            salario: salario ? Number(salario) : null,
+            descricao: descricaoVaga,
+            beneficios: beneficiosSubmit,
+            contatoNome: contatoNome || null,
+            contatoTelefone: contatoTelefone || null,
+            contatoEmail: contatoEmail || null,
         });
     }
 
@@ -156,11 +164,14 @@ export default function FormVaga({
                     />
 
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="flex flex-col gap-1">
-                            <label className="text-sm font-medium text-text-primary">Curso</label>
-                            <SelectCurso curso={curso} onChange={setCurso} />
-                            {erros.curso && <p className="text-xs text-red-600">{erros.curso}</p>}
-                        </div>
+                        <Campo
+                            label="ID da Área"
+                            type="number"
+                            placeholder="Ex: 1"
+                            value={areaId}
+                            onChange={setAreaId}
+                            erro={erros.areaId}
+                        />
                         <Campo
                             label="Localidade"
                             placeholder="Ex: Cidade, RS"
@@ -180,7 +191,7 @@ export default function FormVaga({
                                         name="modalidade"
                                         value={o.valor}
                                         checked={modalidade === o.valor}
-                                        onChange={(e) => setModalidade(e.target.value)}
+                                        onChange={() => setModalidade(o.valor)}
                                         className="accent-primary"
                                     />
                                     {o.label}
@@ -195,7 +206,7 @@ export default function FormVaga({
                             <label className="text-sm font-medium text-text-primary">Turno</label>
                             <select
                                 value={turno}
-                                onChange={(e) => setTurno(e.target.value)}
+                                onChange={(e) => setTurno(e.target.value as Turno)}
                                 className="rounded-md border border-border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                             >
                                 <option value="">Selecione o turno</option>
@@ -281,27 +292,15 @@ export default function FormVaga({
                     </div>
 
                     <div className="flex flex-col gap-1">
-                        <label className="text-sm font-medium text-text-primary">Descrição das Atividades</label>
+                        <label className="text-sm font-medium text-text-primary">Descrição da Vaga</label>
                         <textarea
-                            value={descricaoAtividades}
-                            onChange={(e) => setDescricaoAtividades(e.target.value)}
-                            placeholder="Descreva as responsabilidades diárias do estagiário..."
-                            rows={4}
+                            value={descricaoVaga}
+                            onChange={(e) => setDescricaoVaga(e.target.value)}
+                            placeholder="Descreva as responsabilidades, requisitos e habilidades necessárias..."
+                            rows={6}
                             className="rounded-md border border-border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-y"
                         />
-                        {erros.descricaoAtividades && <p className="text-xs text-red-600">{erros.descricaoAtividades}</p>}
-                    </div>
-
-                    <div className="flex flex-col gap-1">
-                        <label className="text-sm font-medium text-text-primary">Requisitos e Habilidades</label>
-                        <textarea
-                            value={descricaoHabilidades}
-                            onChange={(e) => setDescricaoHabilidades(e.target.value)}
-                            placeholder="Descreva os requisitos e habilidades necessárias..."
-                            rows={4}
-                            className="rounded-md border border-border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-y"
-                        />
-                        {erros.descricaoHabilidades && <p className="text-xs text-red-600">{erros.descricaoHabilidades}</p>}
+                        {erros.descricao && <p className="text-xs text-red-600">{erros.descricao}</p>}
                     </div>
 
                     <fieldset className="flex flex-col gap-3 rounded-md border border-border p-4">

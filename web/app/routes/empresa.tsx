@@ -1,19 +1,10 @@
 import { useEffect, useState } from "react";
 import { MdAddCircleOutline } from "react-icons/md";
 import { Link } from "react-router";
+import type { Vaga } from "~/api/types";
 import API from "../api/api";
 import CardResumo from "../components/CardResumo";
 import CardVaga from "../components/CardVaga";
-
-type Vaga = {
-    id: number;
-    titulo: string;
-    descricao: string;
-    area: { nome: string };
-    local: string | null;
-    salario: number | null;
-    preenchida: boolean;
-};
 
 function formatarRemuneracao(salario: number | null): string {
     if (!salario) return "A combinar";

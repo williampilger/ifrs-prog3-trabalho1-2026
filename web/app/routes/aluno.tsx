@@ -1,20 +1,10 @@
 import { useEffect, useState } from "react";
+import type { Vaga } from "~/api/types";
 import API from "../api/api";
 import Campo from "../components/Campo";
 import Card from "../components/Card";
 import CardVagaDisponivel from "../components/CardVagaDisponivel";
 import SelectCurso from "../components/SelectCurso";
-
-type Vaga = {
-    id: number;
-    titulo: string;
-    area: { nome: string };
-    local: string | null;
-    salario: number | null;
-    preenchida: boolean;
-    empresa?: { nome: string };
-    nomeEmpresa?: string;
-};
 
 function formatarRemuneracao(salario: number | null): string {
     if (!salario) return "A combinar";
@@ -22,7 +12,7 @@ function formatarRemuneracao(salario: number | null): string {
 }
 
 function nomeEmpresa(vaga: Vaga): string {
-    return vaga.empresa?.nome ?? vaga.nomeEmpresa ?? "";
+    return vaga.empresa?.nome ?? "";
 }
 
 export default function Aluno() {

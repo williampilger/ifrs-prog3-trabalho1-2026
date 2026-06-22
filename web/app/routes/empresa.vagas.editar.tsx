@@ -4,24 +4,6 @@ import API from "../api/api";
 import type { Vaga } from "../api/types";
 import FormVaga from "../components/FormVaga";
 
-function vagaParaForm(vaga: Vaga): Vaga {
-    const partes = vaga.descricao.split("\n\n");
-    return {
-        titulo: vaga.titulo,
-        curso: vaga.area.nome,
-        local: vaga.local ?? "",
-        modalidade: vaga.modalidade,
-        turno: vaga.turno,
-        salario: vaga.salario != null ? String(vaga.salario) : "",
-        beneficios: vaga.beneficios.map((b) => b.nome),
-        descricaoAtividades: partes[0] ?? "",
-        descricaoHabilidades: partes.slice(1).join("\n\n"),
-        contatoNome: vaga.contatoNome ?? "",
-        contatoTelefone: vaga.contatoTelefone ?? "",
-        contatoEmail: vaga.contatoEmail ?? "",
-    };
-}
-
 export default function EditarVaga() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
@@ -33,7 +15,7 @@ export default function EditarVaga() {
     useEffect(() => {
         API.vagas.get(id!)
             .then((r) => {
-                if (r.success && r.data?.vaga) setValoresIniciais(vagaParaForm(r.data.vaga));
+                if (r.success && r.data?.vaga) setValoresIniciais(r.data.vaga);
                 else setErros({ titulo: "Vaga não encontrada." });
             })
             .catch(() => setErros({ titulo: "Erro ao carregar a vaga." }))
@@ -43,19 +25,7 @@ export default function EditarVaga() {
     async function handleSubmit(dados: Vaga) {
         setErros({});
         try {
-            const r = await API.vagas.update(id!, {
-                titulo: dados.titulo,
-                turno: dados.turno,
-                modalidade: dados.modalidade,
-                salario: dados.salario ? Number(dados.salario) : null,
-                local: dados.local || null,
-                descricaoAtividades: dados.descricaoAtividades,
-                descricaoHabilidades: dados.descricaoHabilidades || undefined,
-                beneficios: dados.beneficios,
-                contatoNome: dados.contatoNome || null,
-                contatoTelefone: dados.contatoTelefone || null,
-                contatoEmail: dados.contatoEmail || null,
-            });
+            const r = await API.vagas.update(id!, dados);
 
             if (!r.success) {
                 if (r.data?.erros) setErros(r.data.erros);
