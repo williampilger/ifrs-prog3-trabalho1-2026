@@ -96,7 +96,7 @@ export async function vagasRoutes(app: FastifyInstance) {
                 contatoNome: body.contatoNome ?? null,
                 contatoTelefone: body.contatoTelefone ?? null,
                 contatoEmail: body.contatoEmail || null,
-                beneficios: { set: beneficios },
+                beneficios: { connect: beneficios },
             },
             include: {
                 area: true,

@@ -45,6 +45,9 @@ const basicFetch = async (
             case 'DELETE':
                 r = await axiosInstance.delete(`${endpoint}${buildParamString(params as any)}`, { validateStatus: () => true, headers });
                 break;
+            case 'PATCH':
+                r = await axiosInstance.patch(endpoint, params, { validateStatus: () => true, headers });
+                break;
             default:
                 throw new Error('method not allowed');
         }
@@ -102,6 +105,9 @@ const api_exports = {
         update: async (id: string | number, dados: Vaga): Promise<resultType<{ erros?: Record<string, string>; mensagem?: string }>> => {
             const body = { ...dados, beneficios: (dados.beneficios ?? []).map((b) => b.nome) };
             return basicFetch('PUT', `/vagas/${id}`, body);
+        },
+        updateStatus: async (id: string | number, preenchida: boolean): Promise<resultType<{ mensagem?: string }>> => {
+            return basicFetch('PATCH', `/vagas/${id}/status`, { preenchida });
         },
     },
 

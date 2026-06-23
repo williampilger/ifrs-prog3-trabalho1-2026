@@ -30,7 +30,7 @@ app.register(cors, {
             callback(new Error('Not allowed by CORS'), false);
         }
     },
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Permitir todos os métodos
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'authorization', "pin1"], // Permitir cabeçalhos específicos
     credentials: true
 });

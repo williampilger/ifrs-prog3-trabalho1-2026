@@ -10,6 +10,7 @@ import {
     MdCheckCircle,
 } from "react-icons/md";
 import { Link } from "react-router";
+import API from "../api/api";
 
 type CardVagaProps = {
     id: number;
@@ -78,7 +79,11 @@ export default function CardVaga({
                         </button>
                     </Link>
                     <button
-                        onClick={() => setPreenchida((v) => !v)}
+                        onClick={() => {
+                            const novo = !preenchida;
+                            setPreenchida(novo);
+                            API.vagas.updateStatus(id, novo);
+                        }}
                         className={preenchida ? "text-primary" : "text-text-muted hover:text-primary"}
                         title={preenchida ? "Marcar como ativa" : "Marcar como preenchida"}
                     >
