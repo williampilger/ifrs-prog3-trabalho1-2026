@@ -1,6 +1,7 @@
+import { MdAccountBalance, MdBusiness, MdSchool, MdSpeed, MdVerified } from "react-icons/md";
 import { Link } from "react-router";
-import { MdSchool, MdBusiness, MdAccountBalance, MdVerified, MdSpeed } from "react-icons/md";
 import CardFeature from "../components/CardFeature";
+import { useAuth } from "../lib/auth";
 
 const features = [
     {
@@ -21,6 +22,9 @@ const features = [
 ];
 
 export default function Home() {
+    
+    const { usuario } = useAuth();
+
     return (
         <>
             <section className="grid items-center gap-10 py-12 md:grid-cols-2">
@@ -37,20 +41,24 @@ export default function Home() {
                         obrigatórios e não-obrigatórios.
                     </p>
                     <div className="mt-8 flex flex-wrap gap-4">
-                        <Link
-                            to="/aluno"
-                            className="rounded-lg bg-primary px-6 py-3 text-sm font-medium text-white hover:bg-primary-dark transition-colors flex items-center gap-2"
-                        >
-                            <MdSchool className="fill-white block" size={20} />
-                            Sou Aluno
-                        </Link>
-                        <Link
-                            to="/empresa"
-                            className="rounded-lg border bg-background border-primary px-6 py-3 text-sm font-medium text-primary hover:bg-primary-light transition-colors flex items-center gap-2"
-                        >
-                            <MdBusiness className="fill-primary block" size={20} />
-                            Sou Empresa
-                        </Link>
+                        {usuario?.tipo !== "empresa" && (
+                            <Link
+                                to="/aluno"
+                                className="rounded-lg bg-primary px-6 py-3 text-sm font-medium text-white hover:bg-primary-dark transition-colors flex items-center gap-2"
+                            >
+                                <MdSchool className="fill-white block" size={20} />
+                                Sou Aluno
+                            </Link>
+                        )}
+                        {usuario?.tipo !== "aluno" && (
+                            <Link
+                                to="/empresa"
+                                className="rounded-lg border bg-background border-primary px-6 py-3 text-sm font-medium text-primary hover:bg-primary-light transition-colors flex items-center gap-2"
+                            >
+                                <MdBusiness className="fill-primary block" size={20} />
+                                Sou Empresa
+                            </Link>
+                        )}
                     </div>
                 </div>
                 <div className="flex h-72 items-center justify-center rounded-xl bg-primary/90 text-white/70">

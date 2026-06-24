@@ -9,11 +9,17 @@ export default [
     ]),
 
     layout("layouts/privado.tsx", [
-        route("aluno", "routes/aluno.tsx"),
-        route("empresa", "routes/empresa.tsx"),
         route("perfil", "routes/perfil.tsx"),
+    ]),
+
+    layout("layouts/privado-aluno.tsx", [
+        route("aluno", "routes/aluno.tsx"),
+        route("vagas/:id", "routes/vagas.detalhes.tsx"),
+    ]),
+
+    layout("layouts/privado-empresa.tsx", [
+        route("empresa", "routes/empresa.tsx"),
         route("empresa/vagas/nova", "routes/empresa.vagas.nova.tsx"),
         route("empresa/vagas/editar/:id", "routes/empresa.vagas.editar.tsx"),
-        route("vagas/:id", "routes/vagas.detalhes.tsx"),
     ]),
 ] satisfies RouteConfig;
