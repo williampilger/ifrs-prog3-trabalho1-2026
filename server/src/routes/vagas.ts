@@ -29,6 +29,9 @@ async function upsertBeneficios(nomes: string[]) {
 
 export async function vagasRoutes(app: FastifyInstance) {
 
+    /**
+     * Listar AS PRÓPRIAS VAGAS da empresa logada
+     */
     app.get("/vagas", async (request: FastifyRequest, reply) => {
         if (!request.user) return reply.code(401).send({ mensagem: "Não autenticado." });
         if (request.user.tipo !== "empresa") return reply.code(403).send({ mensagem: "Apenas empresas podem listar suas vagas." });
@@ -42,8 +45,12 @@ export async function vagasRoutes(app: FastifyInstance) {
         reply.send({ vagas });
     });
 
+    /**
+     * Listar as vagas disponíveis para alunos
+     */
     app.get("/vagas/disponiveis", async (request: FastifyRequest, reply) => {
         if (!request.user) return reply.code(401).send({ mensagem: "Não autenticado." });
+        if (request.user.tipo !== "aluno") return reply.code(403).send({ mensagem: "Apenas alunos podem listar as vagas abertas." });
 
         const vagas = await prisma.vaga.findMany({
             where: { preenchida: false, excluidoEm: null },
@@ -57,6 +64,7 @@ export async function vagasRoutes(app: FastifyInstance) {
         reply.send({ vagas });
     });
 
+    
     app.get("/vagas/:id", async (request: FastifyRequest, reply) => {
         const { id } = paramsId.parse(request.params);
 
