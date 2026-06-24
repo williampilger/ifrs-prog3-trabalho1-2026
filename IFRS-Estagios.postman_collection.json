@@ -1,0 +1,210 @@
+{
+    "info": {
+        "name": "IFRS Estágios",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "base",
+            "value": "http://localhost:3000"
+        }
+    ],
+    "item": [
+        {
+            "name": "Auth",
+            "item": [
+                {
+                    "name": "Login",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base}}/login",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"aluno@example.com\",\n  \"senha\": \"123456\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Verificar sessão",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base}}/auth"
+                    }
+                },
+                {
+                    "name": "Logout",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base}}/logout"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Cadastro",
+            "item": [
+                {
+                    "name": "Cadastrar aluno",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base}}/cadastro",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"nome\": \"João Silva\",\n  \"email\": \"joao@example.com\",\n  \"senha\": \"123456\",\n  \"telefone\": \"(54) 99999-0001\",\n  \"tipo\": \"aluno\",\n  \"nascimento\": \"2005-03-15\",\n  \"curso\": \"Técnico em Informática\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Cadastrar empresa",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base}}/cadastro",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"nome\": \"Acme Tecnologia Ltda\",\n  \"email\": \"rh@acme.com\",\n  \"senha\": \"123456\",\n  \"telefone\": \"(54) 3212-0001\",\n  \"tipo\": \"empresa\",\n  \"cnpj\": \"12.345.678/0001-99\"\n}"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Perfil",
+            "item": [
+                {
+                    "name": "Ver perfil",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base}}/perfil"
+                    }
+                },
+                {
+                    "name": "Atualizar perfil (aluno)",
+                    "request": {
+                        "method": "PUT",
+                        "url": "{{base}}/perfil",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"nome\": \"João Silva\",\n  \"email\": \"joao@example.com\",\n  \"telefone\": \"(54) 99999-0001\",\n  \"nascimento\": \"2005-03-15\",\n  \"curso\": \"Técnico em Informática\",\n  \"senha\": \"\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Atualizar perfil (empresa)",
+                    "request": {
+                        "method": "PUT",
+                        "url": "{{base}}/perfil",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"nome\": \"Acme Tecnologia Ltda\",\n  \"email\": \"rh@acme.com\",\n  \"telefone\": \"(54) 3212-0001\",\n  \"cnpj\": \"12.345.678/0001-99\",\n  \"senha\": \"\"\n}"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Vagas",
+            "item": [
+                {
+                    "name": "Listar vagas da empresa (requer login empresa)",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base}}/vagas"
+                    }
+                },
+                {
+                    "name": "Listar vagas disponíveis (requer login aluno)",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base}}/vagas/disponiveis"
+                    }
+                },
+                {
+                    "name": "Ver detalhe da vaga",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base}}/vagas/1"
+                    }
+                },
+                {
+                    "name": "Criar vaga (requer login empresa)",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base}}/vagas",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"titulo\": \"Estágio em Desenvolvimento Web\",\n  \"descricao\": \"Atuação no desenvolvimento de sistemas web utilizando tecnologias modernas. O estagiário irá colaborar com a equipe de TI.\",\n  \"areaId\": 1,\n  \"turno\": \"manha\",\n  \"modalidade\": \"hibrido\",\n  \"local\": \"Feliz, RS\",\n  \"salario\": 800,\n  \"contatoNome\": \"Maria Souza\",\n  \"contatoEmail\": \"maria@acme.com\",\n  \"contatoTelefone\": \"(54) 99888-0001\",\n  \"beneficios\": [\"Vale-transporte\", \"Vale-refeição\"]\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Editar vaga (requer login empresa)",
+                    "request": {
+                        "method": "PUT",
+                        "url": "{{base}}/vagas/1",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"titulo\": \"Estágio em Desenvolvimento Web\",\n  \"descricao\": \"Atuação no desenvolvimento de sistemas web utilizando tecnologias modernas. O estagiário irá colaborar com a equipe de TI.\",\n  \"areaId\": 1,\n  \"turno\": \"tarde\",\n  \"modalidade\": \"presencial\",\n  \"local\": \"Feliz, RS\",\n  \"salario\": 900,\n  \"contatoNome\": \"Maria Souza\",\n  \"contatoEmail\": \"maria@acme.com\",\n  \"contatoTelefone\": \"(54) 99888-0001\",\n  \"beneficios\": [\"Vale-transporte\"]\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Marcar vaga como preenchida (requer login empresa)",
+                    "request": {
+                        "method": "PATCH",
+                        "url": "{{base}}/vagas/1/status",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"preenchida\": true\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Reabrir vaga (requer login empresa)",
+                    "request": {
+                        "method": "PATCH",
+                        "url": "{{base}}/vagas/1/status",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"preenchida\": false\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Excluir vaga (requer login empresa)",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{base}}/vagas/1"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Auxiliares",
+            "item": [
+                {
+                    "name": "Listar áreas",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base}}/areas"
+                    }
+                },
+                {
+                    "name": "Listar benefícios",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base}}/beneficios"
+                    }
+                }
+            ]
+        }
+    ]
+}
