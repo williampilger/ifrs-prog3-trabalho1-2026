@@ -61,8 +61,12 @@ export default function Home() {
                         )}
                     </div>
                 </div>
-                <div className="flex h-72 items-center justify-center rounded-xl bg-primary/90 text-white/70">
-                    [ ilustração ]
+                <div className="flex h-72 items-center justify-center rounded-xl bg-primary/90 text-white/70 overflow-hidden">
+                    <img
+                        src="./public/images/foto_estagiaria.jpeg"
+                        alt="IFRS Logo"
+                        className="w-full h-full object-cover"
+                    />
                 </div>
             </section>
 

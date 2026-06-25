@@ -123,14 +123,6 @@ export default function Login() {
                             <Link to="/cadastro" className="font-medium text-primary">Crie sua conta</Link>
                         </p>
                     </form>
-                    <div className="my-5 flex items-center gap-3">
-                        <div className="h-px flex-1 bg-border" />
-                        <span className="text-xs text-text-muted">OU</span>
-                        <div className="h-px flex-1 bg-border" />
-                    </div>
-                    <button className="flex w-full items-center justify-center gap-2 rounded-lg border border-border py-2.5 text-sm font-medium text-text-primary hover:bg-background-alt transition-colors">
-                        Entrar com Google
-                    </button>
                 </Card>
             </div>
         </div>
