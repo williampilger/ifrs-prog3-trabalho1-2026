@@ -117,6 +117,12 @@ const api_exports = {
         },
     },
 
+    areas: {
+        list: async (): Promise<resultType<{ id: number; nome: string }[]>> => {
+        return basicFetch('GET', '/areas', {});
+        },
+    },
+
     perfil: {
         get: async (cookie?: string): Promise<resultType<{ usuario: Usuario }>> => {
             const headers = cookie ? { Cookie: cookie } : undefined;

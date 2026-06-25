@@ -4,28 +4,34 @@ import { prisma } from "../src/lib/prisma.js";
 const md5 = (s: string) => createHash("md5").update(s).digest("hex");
 
 async function main() {
-    const areas = await Promise.all([
-        prisma.area.upsert({
-            where: { nome: "Técnico de Informática" },
-            update: {},
-            create: { nome: "Técnico de Informática" },
-        }),
-        prisma.area.upsert({
-            where: { nome: "Eletrotécnico" },
-            update: {},
-            create: { nome: "Eletrotécnico" },
-        }),
-        prisma.area.upsert({
-            where: { nome: "Montador de Móveis" },
-            update: {},
-            create: { nome: "Montador de Móveis" },
-        }),
-        prisma.area.upsert({
-            where: { nome: "Desenvolvedor FullStack" },
-            update: {},
-            create: { nome: "Desenvolvedor FullStack" },
-        }),
-    ]);
+    // As "áreas" agora correspondem aos cursos do IFRS Campus Feliz.
+    // São os mesmos nomes usados no SelectCurso do frontend, para que o
+    // filtro por curso (aluno.tsx) encontre correspondência.
+    const nomesCursos = [
+        "Técnico em Administração",
+        "Técnico em Informática",
+        "Técnico em Meio Ambiente",
+        "Técnico em Química",
+        "Licenciatura em Letras – Português e Inglês",
+        "Licenciatura em Química",
+        "Bacharelado em Engenharia Ambiental",
+        "Bacharelado em Engenharia Química",
+        "Tecnologia em Análise e Desenvolvimento de Sistemas",
+        "Tecnologia em Processos Gerenciais",
+        "Especialização em Gestão Escolar",
+        "MBA em Gestão Empresarial",
+        "Mestrado Profissional em Tecnologia e Engenharia de Materiais",
+    ];
+
+    await Promise.all(
+        nomesCursos.map((nome) =>
+            prisma.area.upsert({
+                where: { nome },
+                update: {},
+                create: { nome },
+            })
+        )
+    );
 
     const beneficios = await Promise.all([
         prisma.beneficio.upsert({
@@ -101,7 +107,15 @@ async function main() {
     ]);
 
     const [, , empresa1, empresa2] = usuarios;
-    const [tiInformatica] = areas;
+
+    // Busca as áreas/cursos pelos nomes (não depende da ordem de criação).
+    const areaInformatica = await prisma.area.findUniqueOrThrow({
+        where: { nome: "Técnico em Informática" },
+    });
+    const areaADS = await prisma.area.findUniqueOrThrow({
+        where: { nome: "Tecnologia em Análise e Desenvolvimento de Sistemas" },
+    });
+
     const [vt, vr, , auxilioRemoto] = beneficios;
 
     await Promise.all([
@@ -111,7 +125,7 @@ async function main() {
             create: {
                 titulo: "Estágio em TI",
                 descricao: "Manutenção de computadores",
-                areaId: tiInformatica.id,
+                areaId: areaInformatica.id,
                 empresaId: empresa1.id,
                 local: "Bom Princípio",
                 contatoNome: "Pessoa A",
@@ -121,10 +135,7 @@ async function main() {
                 modalidade: "presencial",
                 salario: 1200,
                 beneficios: {
-                    create: [
-                        { beneficio: { connect: { id: vt.id } } },
-                        { beneficio: { connect: { id: vr.id } } },
-                    ],
+                    connect: [{ id: vt.id }, { id: vr.id }],
                 },
             },
         }),
@@ -134,7 +145,7 @@ async function main() {
             create: {
                 titulo: "Trabalho B",
                 descricao: "Manutenção de computadores",
-                areaId: tiInformatica.id,
+                areaId: areaADS.id,
                 empresaId: empresa2.id,
                 local: "Feliz",
                 contatoNome: "Pessoa B",
@@ -144,10 +155,7 @@ async function main() {
                 modalidade: "remoto",
                 salario: 1500,
                 beneficios: {
-                    create: [
-                        { beneficio: { connect: { id: vt.id } } },
-                        { beneficio: { connect: { id: auxilioRemoto.id } } },
-                    ],
+                    connect: [{ id: vt.id }, { id: auxilioRemoto.id }],
                 },
             },
         }),

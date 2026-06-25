@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { MdAdd, MdArrowBack, MdClose, MdSend } from "react-icons/md";
 import { Link } from "react-router";
-import type { Beneficio, Modalidade, Turno, Vaga } from "~/api/types";
+import type { Area, Beneficio, Modalidade, Turno, Vaga } from "~/api/types";
 import API from "../api/api";
 import Campo from "./Campo";
 import Card from "./Card";
@@ -67,6 +67,7 @@ export default function FormVaga({
     const [contatoTelefone, setContatoTelefone] = useState(valoresIniciais.contatoTelefone ?? '');
     const [contatoEmail, setContatoEmail] = useState(valoresIniciais.contatoEmail ?? '');
 
+    const [areas, setAreas] = useState<Area[]>([]);
     const [sugestoes, setSugestoes] = useState<Beneficio[]>([]);
     const [selecionados, setSelecionados] = useState<string[]>(
         (valoresIniciais.beneficios ?? []).map((b) => b.nome)
@@ -89,6 +90,12 @@ export default function FormVaga({
                 setCustomBeneficios((valoresIniciais.beneficios ?? []).map((b) => b.nome));
                 setSelecionados([]);
             });
+    }, []);
+
+    useEffect(() => {
+        API.areas.list().then((r) => {
+            if (r.success) setAreas(r.data);
+        });
     }, []);
 
     function toggle(nome: string) {
@@ -164,14 +171,20 @@ export default function FormVaga({
                     />
 
                     <div className="grid grid-cols-2 gap-4">
-                        <Campo
-                            label="ID da Área"
-                            type="number"
-                            placeholder="Ex: 1"
-                            value={areaId}
-                            onChange={setAreaId}
-                            erro={erros.areaId}
-                        />
+                        <div className="flex flex-col gap-1">
+                            <label className="text-sm font-medium text-text-primary">Curso</label>
+                            <select
+                                value={areaId}
+                                onChange={(e) => setAreaId(e.target.value)}
+                                className="rounded-md border border-border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                            >
+                                <option value="">Selecione o curso</option>
+                                {areas.map((a) => (
+                                    <option key={a.id} value={a.id}>{a.nome}</option>
+                                ))}
+                            </select>
+                            {erros.areaId && <p className="text-xs text-red-600">{erros.areaId}</p>}
+                        </div>
                         <Campo
                             label="Localidade"
                             placeholder="Ex: Cidade, RS"
