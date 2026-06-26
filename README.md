@@ -23,6 +23,7 @@ Para rodar o projeto:
 > No **Terminal 2**, execute o Back-End:
 > ```
 > cd server
+> cp .env.sample .env #copiar o env de exemplo
 > npm i
 > npx prisma generate
 > npm run dev
