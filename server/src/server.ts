@@ -22,14 +22,7 @@ const app = fastify({
 
 app.register(fastifyCookie);
 app.register(cors, {
-    origin: (origin, callback) => {
-        const allowedOrigins = ENV.ALLOWED_ORIGINS;
-        if ((!origin || allowedOrigins.includes(origin) || allowedOrigins.includes('*'))) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'), false);
-        }
-    },
+    origin: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'authorization', "pin1"], // Permitir cabeçalhos específicos
     credentials: true
