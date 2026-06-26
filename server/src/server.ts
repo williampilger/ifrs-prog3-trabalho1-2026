@@ -97,8 +97,19 @@ app.setErrorHandler(async (error: FastifyError, request: FastifyRequest, reply) 
 
     if (error instanceof ZodError) {
         LogSystem.error(250515155929, `Zod Validation error: ${JSON.stringify(error.issues)}`, request);
+
+        // Converte as issues do Zod (array) num objeto { campo: mensagem },
+        // pronto para o frontend exibir o erro abaixo de cada campo.
+        // Mantém apenas a primeira mensagem por campo.
+        const erros: Record<string, string> = {};
+        for (const issue of error.issues) {
+            const campo = issue.path.join(".");
+            if (campo && !erros[campo]) erros[campo] = issue.message;
+        }
+
         reply.status(422).send({
             message: "Zod Validation error",
+            erros,
             issues: error.issues,
         });
         return;

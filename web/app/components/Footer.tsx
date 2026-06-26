@@ -4,7 +4,7 @@ import { MdWeb } from "react-icons/md";
 
 export default function Footer() {
     return (
-        <footer className="border-t border-border-color">
+        <footer className="border-t border-color">
             <div className="mx-auto flex max-w-[1280px] items-center justify-between px-6 py-5 md:px-8">
                 <span className="text-base font-bold text-text-secondary">IFRS Feliz</span>
                 <p className="text-sm text-text-muted">

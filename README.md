@@ -28,8 +28,3 @@ Para rodar o projeto:
 > npm run dev
 > ```
 
-> ⚠️ **Atenção**: Se você não tiver o banco de dados (que é o arquivo `dev.db`), você pode criar um novo banco de dados, após o `npx prisma generate`, com o comando:
-> ```
-> npx prisma migrate deploy
-> ```
-> Mas, por padrão, um banco de exemplo já está incluso neste repositório (como esta é uma entrega de trabalho, ele já vem junto e populado).

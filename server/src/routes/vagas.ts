@@ -7,7 +7,7 @@ const paramsId = z.object({ id: z.coerce.number().int().positive() });
 
 const bodyVaga = z.object({
     titulo: z.string().min(3, "Título deve ter ao menos 3 caracteres."),
-    areaId: z.number().int().positive("Selecione uma área."),
+    areaId: z.number().int().positive("Selecione um curso."),
     turno: z.enum(["integral", "manha", "tarde", "noite"]),
     modalidade: z.enum(["presencial", "remoto", "hibrido"]),
     descricao: z.string().min(10, "Descrição deve ter ao menos 10 caracteres."),

@@ -1,11 +1,30 @@
 import { useState } from "react";
 import { MdVisibility, MdVisibilityOff } from "react-icons/md";
 import { Link, useNavigate } from "react-router";
+import { z } from "zod";
 import SelectCurso from "~/components/SelectCurso";
 import API from "../api/api";
 import Campo from "../components/Campo";
 import Card from "../components/Card";
 import { useAuth } from "../lib/auth";
+
+const schemaCadastro = z
+    .object({
+        nome: z.string().min(2, "Nome deve ter ao menos 2 caracteres."),
+        email: z.string().email("E-mail inválido."),
+        senha: z.string().min(6, "Senha deve ter ao menos 6 caracteres."),
+        tipo: z.enum(["aluno", "empresa"]),
+        nascimento: z.string().optional(),
+        cnpj: z.string().optional(),
+    })
+    .superRefine((data, ctx) => {
+        if (data.tipo === "aluno" && !data.nascimento) {
+            ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["nascimento"], message: "Data de nascimento é obrigatória." });
+        }
+        if (data.tipo === "empresa" && !data.cnpj) {
+            ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["cnpj"], message: "CNPJ é obrigatório." });
+        }
+    });
 
 export default function Cadastro() {
     const navigate = useNavigate();
@@ -33,16 +52,32 @@ export default function Cadastro() {
         setErros({});
         setErroGeral("");
 
-        if (!aceito) {
-            setErros({ aceito: "Você deve aceitar os termos e condições" });
-            return;
-        }
-
         const dados =
             aba === "aluno"
                 ? { nome, email, senha, telefone, nascimento, curso, tipo: "aluno" as const }
                 : { nome, email, senha, telefone, cnpj, tipo: "empresa" as const };
 
+        // 1. Validação local dos campos + termos: tudo de uma vez.
+        const errosLocais: Record<string, string> = {};
+
+        const parsed = schemaCadastro.safeParse(dados);
+        if (!parsed.success) {
+            for (const issue of parsed.error.issues) {
+                const campo = issue.path.join(".");
+                if (campo && !errosLocais[campo]) errosLocais[campo] = issue.message;
+            }
+        }
+        if (!aceito) {
+            errosLocais.aceito = "Você deve aceitar os termos e condições";
+        }
+
+        // Se há qualquer erro local, mostra todos juntos e não chama a API.
+        if (Object.keys(errosLocais).length > 0) {
+            setErros(errosLocais);
+            return;
+        }
+
+        // 2. Tudo válido no cliente: envia ao backend.
         try {
             const rCadastro = await API.cadastro.criar(dados);
 

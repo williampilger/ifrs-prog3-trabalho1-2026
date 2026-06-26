@@ -67,6 +67,20 @@ const basicFetch = async (
     return result;
 };
 
+// Monta o corpo da requisição de vaga: converte os benefícios para nomes
+// e remove os campos opcionais que estão null (o backend espera string ou
+// ausência do campo — não aceita null nos opcionais).
+const montarBodyVaga = (dados: Vaga) => {
+    const body: Record<string, any> = {
+        ...dados,
+        beneficios: (dados.beneficios ?? []).map((b) => b.nome),
+    };
+    for (const campo of ['local', 'salario', 'contatoNome', 'contatoTelefone', 'contatoEmail']) {
+        if (body[campo] === null) delete body[campo];
+    }
+    return body;
+};
+
 const api_exports = {
 
     auth: {
@@ -99,15 +113,16 @@ const api_exports = {
             return basicFetch('GET', `/vagas/${id}`, {});
         },
         create: async (dados: Vaga): Promise<resultType<{ erros?: Record<string, string>; mensagem?: string }>> => {
-            const body = { ...dados, beneficios: (dados.beneficios ?? []).map((b) => b.nome) };
-            return basicFetch('POST', '/vagas', body);
+            return basicFetch('POST', '/vagas', montarBodyVaga(dados));
         },
         update: async (id: string | number, dados: Vaga): Promise<resultType<{ erros?: Record<string, string>; mensagem?: string }>> => {
-            const body = { ...dados, beneficios: (dados.beneficios ?? []).map((b) => b.nome) };
-            return basicFetch('PUT', `/vagas/${id}`, body);
+            return basicFetch('PUT', `/vagas/${id}`, montarBodyVaga(dados));
         },
         updateStatus: async (id: string | number, preenchida: boolean): Promise<resultType<{ mensagem?: string }>> => {
             return basicFetch('PATCH', `/vagas/${id}/status`, { preenchida });
+        },
+        remove: async (id: string | number): Promise<resultType<{ mensagem?: string }>> => {
+            return basicFetch('DELETE', `/vagas/${id}`, {});
         },
     },
 

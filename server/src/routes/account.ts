@@ -123,7 +123,7 @@ export async function AccountsRoutes(app: FastifyInstance) {
                 email: body.email,
                 telefone: body.telefone ?? null,
                 // só inclui o campo se veio no body; undefined = Prisma não toca no valor atual
-                // ...(body.nascimento !== undefined ? { nascimento: body.nascimento } : {}),
+                ...(body.nascimento !== undefined ? { nascimento: body.nascimento } : {}),
                 ...(body.curso !== undefined ? { curso: body.curso || null } : {}),
                 ...(body.cnpj !== undefined ? { cnpj: body.cnpj } : {}),
                 ...(body.senha ? { pswd: md5(body.senha) } : {}),

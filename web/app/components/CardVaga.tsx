@@ -1,4 +1,5 @@
 import { useState } from "react";
+import ModalConfirm from "./ModalConfirm";
 import Card from "./Card";
 import {
     MdSchool,
@@ -20,6 +21,7 @@ type CardVagaProps = {
     local: string;
     remuneracao: string;
     statusInicial?: boolean;
+    onExcluir?: (id: number) => void;
 };
 
 export default function CardVaga({
@@ -30,8 +32,16 @@ export default function CardVaga({
     local,
     remuneracao,
     statusInicial = false,
+    onExcluir,
 }: CardVagaProps) {
     const [preenchida, setPreenchida] = useState(statusInicial);
+    const [confirmando, setConfirmando] = useState(false);
+
+    async function excluir() {
+        const r = await API.vagas.remove(id);
+        setConfirmando(false);
+        if (r.success) onExcluir?.(id);
+    }
 
     const corIcone = preenchida ? "text-text-muted" : "text-primary";
     const corTexto = preenchida ? "text-text-muted" : "text-text-primary";
@@ -89,11 +99,23 @@ export default function CardVaga({
                     >
                         {preenchida ? <MdCheckCircle size={24} /> : <MdCheckCircleOutline size={24} />}
                     </button>
-                    <button className="text-danger hover:text-danger-dark" title="Excluir">
+                    <button 
+                        onClick={() => setConfirmando(true)}
+                        className="text-danger hover:text-danger-dark" 
+                        title="Excluir"
+                    >
                         <MdDelete size={24} />
                     </button>
                 </div>
             </div>
+            <ModalConfirm
+                aberto={confirmando}
+                titulo="Excluir vaga"
+                mensagem="Esta vaga deixará de aparecer nas listagens. Deseja continuar?"
+                textoConfirmar="Excluir"
+                onConfirmar={excluir}
+                onCancelar={() => setConfirmando(false)}
+            />
         </Card>
     );
 }

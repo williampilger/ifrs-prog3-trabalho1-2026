@@ -49,6 +49,7 @@ export default function Empresa() {
                             local={v.local ?? "A definir"}
                             remuneracao={formatarRemuneracao(v.salario)}
                             statusInicial={v.preenchida}
+                            onExcluir={(id) => setVagas((atual) => atual.filter((vaga) => vaga.id !== id))}
                         />
                     ))}
                     {vagas.length === 0 && (
